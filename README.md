@@ -44,3 +44,15 @@ prints the currently-detected signals as JSON.
   variables are never read or forwarded.
 - `FLY_INVOKED_BY` (and the cross-tool `AGENT` convention) are sanitized and
   length-capped before being emitted anywhere.
+
+## Cutting a Release
+
+If you have write access to this repo, you can ship a release with:
+
+`scripts/bump_version.sh`
+
+Or a prerelease with:
+
+`scripts/bump_version.sh prerel`
+
+The release and notes will be created automatically via Github Actions. Follow along in: https://github.com/superfly/client-signals/actions/workflows/release.yml
