@@ -7,9 +7,8 @@ Context for coding agents working in this repo.
 `clientsignals` computes coarse, privacy-safe signals used to estimate
 whether a CLI process is human- or AI-agent-driven, and provides an
 `http.RoundTripper` wrapper (`Signals.WrapTransport`) that attaches them to
-outbound requests. It's a single-purpose leaf library extracted from
-[fly-go](https://github.com/superfly/fly-go), which is currently its only
-consumer.
+outbound requests. It's a single-purpose leaf library with no dependents
+of its own.
 
 Read `README.md` first. For the "why" behind the actual signal values and
 detection logic — not just the "what" — read:
@@ -35,9 +34,6 @@ detection logic — not just the "what" — read:
 
 ## Invariants — do not casually relax these
 
-- **No dependency on fly-go.** This package must stay importable
-  standalone; `.golangci.yml`'s `gomodguard` blocks importing
-  `github.com/superfly/fly-go` and will fail CI if that's violated.
 - **No new external dependencies beyond `golang.org/x/sys`.** Keeping this
   a near-zero-dependency leaf is deliberate.
 - **Never spawn a subprocess for parent-process lookup.** Linux reads

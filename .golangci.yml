@@ -27,10 +27,6 @@ linters:
       allowed:
         domains:
           - golang.org
-      blocked:
-        modules:
-          - github.com/superfly/fly-go:
-              reason: "this package must stay self-contained (no dependency on its own consumer) so it can be used standalone"
   exclusions:
     generated: lax
     presets:

@@ -1,10 +1,9 @@
 // Package clientsignals computes coarse, privacy-safe signals that help
 // estimate whether a CLI process is being driven by a human or an AI agent.
 //
-// This package is intentionally self-contained (no imports of the parent
-// fly-go module, and only golang.org/x/sys as an external dependency, used
-// for syscall-based parent-process lookup on Darwin/Windows) so it can later
-// be extracted into its own standalone library with minimal friction.
+// This package is intentionally self-contained: no dependencies beyond the
+// standard library and golang.org/x/sys (used for syscall-based
+// parent-process lookup on Darwin/Windows), so it can be used standalone.
 package clientsignals
 
 import "sync"

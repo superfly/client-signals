@@ -11,9 +11,6 @@ These are meant to be combined into an *estimate with confidence*, never
 treated as per-request certainty, and never used for gating, blocking,
 rate-limiting, or auth decisions.
 
-Extracted from [fly-go](https://github.com/superfly/fly-go), which is
-currently its only consumer.
-
 ## Usage
 
 ```go
