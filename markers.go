@@ -18,6 +18,10 @@ const (
 // agent detection. The env name is what gets emitted verbatim (never the
 // value) as AgentSource, e.g. "env:CLAUDECODE".
 //
+// See docs/markers.md for the full rationale behind this table (confidence
+// per entry, why presence vs. exact-value was chosen for each, and the
+// checklist for adding a new one) before editing it.
+//
 // Do not add config-style variables that humans set by hand here (e.g.
 // OPENCLAW_HOME, HERMES_HOME, PICOCLAW_HOME, PI_CODING_AGENT_DIR,
 // KILO_ORG_ID, AIDER_*) — their presence says nothing about how the CLI was
