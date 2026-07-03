@@ -9,6 +9,12 @@ import (
 // parentBucket classifies the immediate parent process into a coarse,
 // finite bucket. It never returns a raw process name — always one of
 // "node", "python", "shell", or "other".
+//
+// This is the noisiest of the signals in Signals — see docs/signals.md for
+// why (shells are ambiguous in both directions, wrappers hide the real
+// caller, fast agent loops can exit before this runs, containers flatten
+// the process tree) and how it should be weighted relative to the other
+// fields.
 func parentBucket() string {
 	return classifyParentName(lookupParentName(os.Getppid()))
 }

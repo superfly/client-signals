@@ -11,6 +11,11 @@ import "sync"
 
 // Signals is the set of coarse, privacy-safe traffic-classification signals
 // computed once per process.
+//
+// See docs/signals.md for the reasoning behind these fields, each one's
+// known reliability caveats, and how they're meant to be combined — no
+// single field here is sufficient on its own, and none should ever drive
+// gating/enforcement decisions.
 type Signals struct {
 	// Interactive is true if the process's stdout appears to be attached to
 	// a terminal.

@@ -7,6 +7,9 @@ import "os"
 // (no ioctl/GetConsoleMode, just the ModeCharDevice bit from Stat), traded
 // off deliberately to keep this package dependency-free. Acceptable here
 // because Interactive is a coarse traffic-classification bit, not a UX gate.
+//
+// See docs/signals.md for why stdout (not stdin) and what "false" does and
+// doesn't tell you.
 func isInteractive() bool {
 	return isInteractiveFile(os.Stdout)
 }

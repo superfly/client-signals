@@ -45,8 +45,11 @@ prints the currently-detected signals as JSON.
 - `FLY_INVOKED_BY` (and the cross-tool `AGENT` convention) are sanitized and
   length-capped before being emitted anywhere.
 
-See [docs/markers.md](docs/markers.md) for the full rationale behind the
-known agent markers table (`markers.go`) — where each entry came from, its
+See [docs/signals.md](docs/signals.md) for the reasoning behind each field
+in `Signals` and its known reliability caveats (parent-process detection
+especially is noisier than it looks), and
+[docs/markers.md](docs/markers.md) for the full rationale behind the known
+agent markers table (`markers.go`) — where each entry came from, its
 confidence, and how to add new ones.
 
 ## Cutting a Release
