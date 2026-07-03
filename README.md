@@ -26,6 +26,16 @@ httpClient := &http.Client{
 User-Agent suffix to every request it forwards. Detection happens once,
 at the point you call `Detect()`/`DetectOnce()` — never per request.
 
+This library isn't Fly.io-specific — the `Fly` header prefix is just the
+default. Use `Signals.WrapTransportWithPrefix` to use your own:
+
+```go
+httpClient := &http.Client{
+    Transport: sig.WrapTransportWithPrefix(http.DefaultTransport, "Acme"),
+}
+// -> Acme-Client-Interactive, Acme-Client-Parent, ...
+```
+
 ## Inspecting signals
 
 ```sh

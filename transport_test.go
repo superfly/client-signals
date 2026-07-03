@@ -122,3 +122,33 @@ func TestSignals_WrapTransport(t *testing.T) {
 		t.Fatalf("User-Agent = %q, want %q", ua, wantUA)
 	}
 }
+
+func TestSignals_WrapTransportWithPrefix(t *testing.T) {
+	sig := Signals{Interactive: true, Parent: "shell"}
+
+	capture := &captureTripper{}
+	transport := sig.WrapTransportWithPrefix(capture, "Acme")
+
+	req, err := http.NewRequest(http.MethodGet, "http://example.test", nil)
+	if err != nil {
+		t.Fatalf("NewRequest returned error: %v", err)
+	}
+
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		t.Fatalf("RoundTrip returned error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if got := capture.req.Header.Get("Acme-Client-Interactive"); got != "true" {
+		t.Fatalf("Acme-Client-Interactive header = %q, want %q", got, "true")
+	}
+	if got := capture.req.Header.Get("Acme-Client-Parent"); got != "shell" {
+		t.Fatalf("Acme-Client-Parent header = %q, want %q", got, "shell")
+	}
+	for _, h := range []string{"Fly-Client-Interactive", "Fly-Client-Parent"} {
+		if got := capture.req.Header.Get(h); got != "" {
+			t.Fatalf("%s header = %q, want empty when using a custom prefix", h, got)
+		}
+	}
+}
