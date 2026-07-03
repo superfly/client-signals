@@ -42,6 +42,24 @@ func headersFor(prefix string, s Signals) map[string]string {
 	return h
 }
 
+// ApplyHeaders sets the Fly-Client-* headers on header directly, for
+// callers that need to attach client signals to something other than an
+// http.Request going through an http.RoundTripper — e.g. a WebSocket
+// handshake's header, built and sent outside of net/http's Client/Transport
+// machinery entirely. Uses DefaultHeaderPrefix ("Fly").
+func (s Signals) ApplyHeaders(header http.Header) {
+	s.ApplyHeadersWithPrefix(header, DefaultHeaderPrefix)
+}
+
+// ApplyHeadersWithPrefix is like ApplyHeaders but lets callers outside
+// Fly.io substitute their own header prefix, matching
+// WrapTransportWithPrefix's prefix for the same Signals value.
+func (s Signals) ApplyHeadersWithPrefix(header http.Header, prefix string) {
+	for k, v := range headersFor(prefix, s) {
+		header.Set(k, v)
+	}
+}
+
 // ClientSignalsTransport wraps an http.RoundTripper, attaching the
 // {prefix}-Client-* headers and appending the client-signals token to the
 // existing User-Agent header on every outgoing request.

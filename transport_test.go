@@ -152,3 +152,61 @@ func TestSignals_WrapTransportWithPrefix(t *testing.T) {
 		}
 	}
 }
+
+func TestSignals_ApplyHeaders(t *testing.T) {
+	sig := Signals{
+		Interactive: true,
+		Parent:      "node",
+		Agent:       "claude-code",
+		AgentSource: "env:CLAUDECODE",
+		CI:          true,
+	}
+
+	header := http.Header{}
+	sig.ApplyHeaders(header)
+
+	cases := map[string]string{
+		"Fly-Client-Interactive":  "true",
+		"Fly-Client-Parent":       "node",
+		"Fly-Client-Agent":        "claude-code",
+		"Fly-Client-Agent-Source": "env:CLAUDECODE",
+		"Fly-Client-CI":           "true",
+	}
+	for name, want := range cases {
+		if got := header.Get(name); got != want {
+			t.Fatalf("%s header = %q, want %q", name, got, want)
+		}
+	}
+}
+
+func TestSignals_ApplyHeadersWithPrefix(t *testing.T) {
+	sig := Signals{Interactive: true, Parent: "shell"}
+
+	header := http.Header{}
+	sig.ApplyHeadersWithPrefix(header, "Acme")
+
+	if got := header.Get("Acme-Client-Interactive"); got != "true" {
+		t.Fatalf("Acme-Client-Interactive header = %q, want %q", got, "true")
+	}
+	if got := header.Get("Acme-Client-Parent"); got != "shell" {
+		t.Fatalf("Acme-Client-Parent header = %q, want %q", got, "shell")
+	}
+	for _, h := range []string{"Fly-Client-Interactive", "Fly-Client-Parent"} {
+		if got := header.Get(h); got != "" {
+			t.Fatalf("%s header = %q, want empty when using a custom prefix", h, got)
+		}
+	}
+}
+
+func TestSignals_ApplyHeaders_OmitsAgentAndCIWhenUnset(t *testing.T) {
+	sig := Signals{Interactive: false, Parent: "other"}
+
+	header := http.Header{}
+	sig.ApplyHeaders(header)
+
+	for _, h := range []string{"Fly-Client-Agent", "Fly-Client-Agent-Source", "Fly-Client-CI"} {
+		if got := header.Get(h); got != "" {
+			t.Fatalf("%s header = %q, want empty when Agent/CI are unset", h, got)
+		}
+	}
+}

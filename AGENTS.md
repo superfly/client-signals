@@ -27,7 +27,10 @@ detection logic — not just the "what" — read:
   bucket, one implementation per OS via build tags.
 - `agent.go` + `markers.go` — cooperative agent-marker detection.
 - `ci.go` — CI detection.
-- `transport.go` — `ClientSignalsTransport`, `Signals.WrapTransport`.
+- `transport.go` — `ClientSignalsTransport`, `Signals.WrapTransport`, and
+  `Signals.ApplyHeaders`/`ApplyHeadersWithPrefix` for non-`http.RoundTripper`
+  consumers (e.g. WebSocket handshakes) that need the same headers without
+  a transport to wrap.
 - `cmd/` — a small CLI (`go run ./cmd`) that prints currently-detected
   signals as JSON; useful for manually checking behavior under different
   invocation contexts (piped, under an agent harness, etc.).

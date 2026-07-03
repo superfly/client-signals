@@ -36,6 +36,17 @@ httpClient := &http.Client{
 // -> Acme-Client-Interactive, Acme-Client-Parent, ...
 ```
 
+For traffic that doesn't go through an `http.RoundTripper` at all — e.g. a
+WebSocket handshake built and sent by hand — use `Signals.ApplyHeaders` (or
+`ApplyHeadersWithPrefix`) to set the same headers directly on an
+`http.Header`:
+
+```go
+header := http.Header{}
+sig.ApplyHeaders(header) // or sig.ApplyHeadersWithPrefix(header, "Acme")
+conn, _, err := dialer.DialContext(ctx, wsURL, header)
+```
+
 ## Inspecting signals
 
 ```sh
