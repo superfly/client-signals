@@ -1,4 +1,4 @@
-module github.com/superfly/client-signals
+module github.com/superfly/client-signals/go
 
 go 1.25.8
 

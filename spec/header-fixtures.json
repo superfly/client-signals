@@ -1,0 +1,37 @@
+[
+  {
+    "name": "full default prefix",
+    "prefix": "Fly",
+    "signals": {
+      "interactive": true,
+      "parent": "node",
+      "agent": "claude-code",
+      "agentSource": "env:CLAUDECODE",
+      "ci": true
+    },
+    "headers": {
+      "Fly-Client-Interactive": "true",
+      "Fly-Client-Parent": "node",
+      "Fly-Client-Agent": "claude-code",
+      "Fly-Client-Agent-Source": "env:CLAUDECODE",
+      "Fly-Client-CI": "true"
+    },
+    "userAgentSuffix": "(interactive=true; parent=node; agent=claude-code)"
+  },
+  {
+    "name": "minimal custom prefix",
+    "prefix": "Acme",
+    "signals": {
+      "interactive": false,
+      "parent": "other",
+      "agent": "",
+      "agentSource": "",
+      "ci": false
+    },
+    "headers": {
+      "Acme-Client-Interactive": "false",
+      "Acme-Client-Parent": "other"
+    },
+    "userAgentSuffix": "(interactive=false; parent=other)"
+  }
+]

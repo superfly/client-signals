@@ -1,0 +1,17 @@
+{
+  "name": "@superfly/client-signals",
+  "version": "0.0.0",
+  "description": "Privacy-safe client signals for CLI HTTP traffic.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

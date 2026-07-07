@@ -43,7 +43,7 @@ formatters:
     - gofumpt
   settings:
     gofumpt:
-      module-path: github.com/superfly/client-signals
+      module-path: github.com/superfly/client-signals/go
   exclusions:
     generated: lax
     paths:
