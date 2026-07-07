@@ -1,10 +1,11 @@
 # Agent markers: background and how to add new ones
 
-This documents the reasoning behind `knownMarkers` in `markers.go` — where
-it came from, why each entry is shaped the way it is, and what future
-agents/developers should check before adding to it. `markers.go` itself
-only carries the terse "don't add these" rule; the fuller "why" lives here
-so it doesn't get lost.
+This documents the reasoning behind the shared agent-marker table in
+`spec/markers.json` and its language-specific mirrors — where it came
+from, why each entry is shaped the way it is, and what future
+agents/developers should check before adding to it. Runtime source files
+only carry terse safety notes; the fuller "why" lives here so it doesn't
+get lost.
 
 ## Where this came from
 
@@ -12,19 +13,17 @@ so it doesn't get lost.
 fraction of Fly CLI traffic (flyctl, sprites) is driven by AI coding agents
 vs. typed by humans, for capacity planning, rate-limit/abuse policy, and
 product decisions — **never** for per-request gating or enforcement. The
-cooperative-agent marker is the most specific of three signals (the other
-two, interactivity and parent-process bucket, are coarser and live in
-`interactive.go`/`parent.go`). It's "cooperative" because it only ever
-raises confidence — its *absence* is not evidence of a human, since not
-every agent harness sets a recognizable marker.
+cooperative-agent marker is the most specific of the shared signals.
+Interactivity and parent-process bucket are coarser. It's "cooperative"
+because it only ever raises confidence — its *absence* is not evidence of a
+human, since not every agent harness sets a recognizable marker.
 
 ## Precedence
 
 1. `FLY_INVOKED_BY` — a public, documented env var any agent harness (ours
    or third-party) can set to self-declare, e.g. `FLY_INVOKED_BY=my-tool`.
    This is the only field on the wire that isn't from the fixed table
-   below, so it's sanitized and length-capped (`sanitizeInvokedBy` in
-   `agent.go`) before ever being emitted.
+   below, so it's sanitized and length-capped before ever being emitted.
 2. The `knownMarkers` table, first match wins.
 3. The cross-tool `AGENT=<name>` convention (also sanitized the same way).
 
@@ -104,9 +103,11 @@ bug to work around.
    name itself is tool-specific enough that only that tool would plausibly
    set it.
 3. Never match on or forward anything secret-shaped.
-4. Add a row to `knownMarkers` in `markers.go` and a corresponding case in
-   `agent_test.go`'s table-driven test.
-5. Update the table above with the same reasoning (kind + confidence +
+4. Add a row to `spec/markers.json` and mirror it in each language
+   package's dependency-free marker table.
+5. Add or update fixture-driven tests in each package so the mirror stays
+   aligned with `spec/markers.json`.
+6. Update the table above with the same reasoning (kind + confidence +
    why), so the next person doesn't have to reconstruct it.
 
 This list is expected to grow as new agent harnesses appear; there's no

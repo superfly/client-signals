@@ -1,0 +1,12 @@
+[
+  {"name": "simple", "input": "claude-code", "want": "claude-code", "valid": true},
+  {"name": "uppercase normalized", "input": "Claude-Code", "want": "claude-code", "valid": true},
+  {"name": "whitespace trimmed", "input": "  claude-code  ", "want": "claude-code", "valid": true},
+  {"name": "empty", "input": "", "want": "", "valid": false},
+  {"name": "only whitespace", "input": "   ", "want": "", "valid": false},
+  {"name": "leading hyphen rejected", "input": "-claude", "want": "", "valid": false},
+  {"name": "slash rejected", "input": "not/valid", "want": "", "valid": false},
+  {"name": "space rejected", "input": "not valid", "want": "", "valid": false},
+  {"name": "too long rejected", "input": "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc", "want": "", "valid": false},
+  {"name": "max length ok", "input": "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "want": "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "valid": true}
+]

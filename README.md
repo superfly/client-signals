@@ -1,83 +1,71 @@
 client-signals
 ==============
 
-Computes coarse, privacy-safe signals that help estimate whether a CLI
-process is being driven by a human or an AI agent: terminal attachment, a
-coarse parent-process bucket (`node`/`python`/`shell`/`other`), a
-cooperative agent marker (self-declared via `FLY_INVOKED_BY`, or passively
-detected from known agent-harness environment variables), and CI detection.
+`client-signals` computes coarse, privacy-safe signals that help estimate
+whether a CLI process is being driven by a human or an AI agent.
 
-These are meant to be combined into an *estimate with confidence*, never
-treated as per-request certainty, and never used for gating, blocking,
-rate-limiting, or auth decisions.
+The project is a monorepo for the same behavior across multiple
+programming languages. Every implementation follows the shared contract in
+`spec/`: terminal attachment, a coarse parent-process bucket
+(`node`/`python`/`shell`/`other`), a cooperative agent marker, and CI
+detection.
 
-## Usage
+These signals are meant to be combined into an *estimate with confidence*,
+never treated as per-request certainty, and never used for gating,
+blocking, rate-limiting, or auth decisions.
 
-```go
-sig := clientsignals.DetectOnce()
+## Monorepo layout
 
-httpClient := &http.Client{
-    Transport: sig.WrapTransport(http.DefaultTransport),
-}
-```
+- `spec/` — shared marker table and behavior fixtures.
+- `go/` — Go implementation and package README.
+- `javascript/` — JavaScript implementation and package README.
+- `python/` — Python implementation and package README.
+- `elixir/` — Elixir implementation and package README.
+- `docs/` — shared signal rationale and marker-review guidance.
 
-`ClientSignalsTransport` (returned by `Signals.WrapTransport`) attaches
-`Fly-Client-*` headers and a `(interactive=...; parent=...; agent=...)`
-User-Agent suffix to every request it forwards. Detection happens once,
-at the point you call `Detect()`/`DetectOnce()` — never per request.
+The language packages intentionally expose the same library-only surface:
+detect signals once, build/apply `{prefix}-Client-*` headers, and build the
+client-signals User-Agent suffix. See each package README for language
+specific installation, API names, and examples.
 
-This library isn't Fly.io-specific — the `Fly` header prefix is just the
-default. Use `Signals.WrapTransportWithPrefix` to use your own:
+## Shared contract
 
-```go
-httpClient := &http.Client{
-    Transport: sig.WrapTransportWithPrefix(http.DefaultTransport, "Acme"),
-}
-// -> Acme-Client-Interactive, Acme-Client-Parent, ...
-```
+All implementations must preserve these invariants:
 
-For traffic that doesn't go through an `http.RoundTripper` at all — e.g. a
-WebSocket handshake built and sent by hand — use `Signals.ApplyHeaders` (or
-`ApplyHeadersWithPrefix`) to set the same headers directly on an
-`http.Header`:
+- Only finite, pre-approved values leave the package, except sanitized
+  self-declarations from `FLY_INVOKED_BY` or `AGENT`.
+- Secret-shaped environment variables are never read or forwarded, even
+  for presence checks.
+- Parent process names are collapsed to `node`, `python`, `shell`, or
+  `other`; raw process names are never emitted.
+- Detection is computed once for long-lived clients and must not run per
+  HTTP request.
+- Header prefix defaults to `Fly`, producing names like
+  `Fly-Client-Interactive` and `Fly-Client-Parent`.
 
-```go
-header := http.Header{}
-sig.ApplyHeaders(header) // or sig.ApplyHeadersWithPrefix(header, "Acme")
-conn, _, err := dialer.DialContext(ctx, wsURL, header)
-```
+## Development
 
-## Inspecting signals
+Run all package tests:
 
 ```sh
-go run ./cmd
+(cd go && go test ./...)
+(cd javascript && npm test)
+(cd python && python3 -m unittest)
+(cd elixir && mix test)
 ```
 
-prints the currently-detected signals as JSON.
+Go platform build checks:
 
-## Privacy
+```sh
+(cd go && GOOS=linux GOARCH=amd64 go build ./...)
+(cd go && GOOS=darwin GOARCH=arm64 go build ./...)
+(cd go && GOOS=windows GOARCH=amd64 go build ./...)
+```
 
-- Only approved, finite values are ever emitted (see `Signals` field docs).
-- Agent detection is presence/exact-value based; secret-shaped environment
-  variables are never read or forwarded.
-- `FLY_INVOKED_BY` (and the cross-tool `AGENT` convention) are sanitized and
-  length-capped before being emitted anywhere.
+See [docs/signals.md](docs/signals.md) for signal rationale and
+[docs/markers.md](docs/markers.md) for marker-review guidance.
 
-See [docs/signals.md](docs/signals.md) for the reasoning behind each field
-in `Signals` and its known reliability caveats (parent-process detection
-especially is noisier than it looks), and
-[docs/markers.md](docs/markers.md) for the full rationale behind the known
-agent markers table (`markers.go`) — where each entry came from, its
-confidence, and how to add new ones.
+## Releases
 
-## Cutting a Release
-
-If you have write access to this repo, you can ship a release with:
-
-`scripts/bump_version.sh`
-
-Or a prerelease with:
-
-`scripts/bump_version.sh prerel`
-
-The release and notes will be created automatically via Github Actions. Follow along in: https://github.com/superfly/client-signals/actions/workflows/release.yml
+The existing tag workflow creates a GitHub release. npm, PyPI, and Hex
+publishing are not automated yet.

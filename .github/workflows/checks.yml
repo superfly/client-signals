@@ -22,13 +22,15 @@ jobs:
       - uses: actions/checkout@v7.0.0
       - uses: actions/setup-go@v6
         with:
-          go-version-file: "go.mod"
+          go-version-file: "go/go.mod"
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9.2.1
         with:
           version: v2.11.3
+          working-directory: go
 
-  test:
+  go-test:
+    name: go test
     strategy:
       fail-fast: false
       matrix:
@@ -38,10 +40,50 @@ jobs:
       - uses: actions/checkout@v7.0.0
       - uses: actions/setup-go@v6
         with:
-          go-version-file: "go.mod"
+          go-version-file: "go/go.mod"
       - name: go mod download
+        working-directory: go
         run: go mod download
       - name: go mod verify
+        working-directory: go
         run: go mod verify
       - name: Run tests
+        working-directory: go
         run: go test ./...
+
+  javascript-test:
+    name: javascript test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - name: Run tests
+        working-directory: javascript
+        run: npm test
+
+  python-test:
+    name: python test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.9"
+      - name: Run tests
+        working-directory: python
+        run: python -m unittest
+
+  elixir-test:
+    name: elixir test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.15"
+          otp-version: "26"
+      - name: Run tests
+        working-directory: elixir
+        run: mix test

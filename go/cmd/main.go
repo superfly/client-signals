@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/superfly/client-signals"
+	"github.com/superfly/client-signals/go"
 )
 
 func main() {

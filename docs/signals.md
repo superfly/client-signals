@@ -1,12 +1,10 @@
 # Signals: background and reliability caveats
 
-This documents the reasoning behind the `Signals` struct and its four
-fields (`signals.go`, `interactive.go`, `parent.go`, `ci.go`, and the agent
-detection covered separately in [markers.md](markers.md)) — what each
-signal is worth, its known failure modes, and how they're meant to be
-combined. The struct/field doc comments cover the "what"; this covers the
-"why" and "how reliable," which doesn't fit in a doc comment without
-burying the actual API reference.
+This documents the reasoning behind the shared `client-signals` data model:
+terminal attachment, parent-process bucket, cooperative agent marker, and
+CI detection. The language package READMEs cover concrete APIs and
+installation; this file covers what each signal is worth, its known failure
+modes, and how the signals are meant to be combined.
 
 ## Why these four fields, in this order
 
@@ -35,18 +33,14 @@ a human piping output through `| less` or `| tee` looks the same as a
 script. Treat this as "plausibly unattended," not "definitely automated."
 
 **Implementation notes**:
-- Checks `os.Stdout`, not `os.Stdin`. Rationale: the signal we actually
-  want is "is a human plausibly watching this run," which stdout answers
-  better — a human can pipe stdin from a file while still watching a TTY,
-  but if stdout itself is redirected there's essentially never a human
-  directly watching. Checking both and requiring both true is a reasonable
-  alternative if stdout-only turns out to have too many false positives in
-  practice (e.g. an agent wrapper that allocates a pty for stdout but
-  drives stdin itself).
-- Uses the `os.ModeCharDevice` bit from `Stat()`, not
-  `golang.org/x/term.IsTerminal`. This is a cruder check (no
-  `ioctl`/`GetConsoleMode`), traded off deliberately to keep this package
-  dependency-free.
+- Implementations check stdout, not stdin. Rationale: the signal we
+  actually want is "is a human plausibly watching this run," which stdout
+  answers better — a human can pipe stdin from a file while still watching
+  a TTY, but if stdout itself is redirected there's essentially never a
+  human directly watching.
+- Implementations should use dependency-light runtime or standard-library
+  terminal checks and treat errors as `false`. This signal is a coarse
+  traffic-classification bit, not a UX gate.
 
 ## `Parent`
 
@@ -76,13 +70,10 @@ rely on it alone:**
   server-side rather than trusted alone.
 
 **Implementation notes**: parent-process name lookup never spawns a
-subprocess (a real cost that was worth avoiding even though it only
-happens once per process) — it reads `/proc/<ppid>/comm` on Linux, issues
-a direct `sysctl` via `golang.org/x/sys/unix` on Darwin, and walks a
-Toolhelp32 snapshot via `golang.org/x/sys/windows` on Windows. Whatever
-that raw name is, `classifyParentName` collapses it into the finite bucket
-set — an unrecognized or unavailable parent name always becomes `other`,
-never propagated as-is.
+subprocess. Implementations should use native or filesystem process state
+where available and fall back to `other`. Whatever the raw name is,
+classification collapses it into the finite bucket set — an unrecognized
+or unavailable parent name always becomes `other`, never propagated as-is.
 
 ## `Agent` / `AgentSource`
 
@@ -120,10 +111,11 @@ intended interpretation:
 
 ## Compute once, never per request
 
-`Detect()` is pure and does the actual work (file/environment reads, the
-parent-process lookup); `DetectOnce()` wraps it in `sync.OnceValue` so
-repeated calls in the same process are free. Signal collection is
-expensive enough (a syscall or `/proc` read, plus scanning ~20 env vars)
-that it must never run per HTTP request — see `ClientSignalsTransport` in
-`transport.go`, which computes this once at construction and reuses the
-result for every request the transport forwards.
+Every language package exposes a fresh detection call and a cached
+process-wide detection call. Signal collection involves file/environment
+reads and parent-process lookup, so long-lived clients should compute once
+and reuse the result. Detection must never run per HTTP request.
+
+The initial monorepo libraries expose header helpers in every language.
+The Go package also keeps its `http.RoundTripper` wrapper because it was
+part of the pre-monorepo API.
