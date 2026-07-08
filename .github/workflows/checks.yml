@@ -84,6 +84,9 @@ jobs:
         with:
           elixir-version: "1.15"
           otp-version: "26"
+      - name: mix deps.get
+        working-directory: elixir
+        run: mix deps.get
       - name: Run tests
         working-directory: elixir
         run: mix test
