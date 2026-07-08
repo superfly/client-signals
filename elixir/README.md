@@ -45,6 +45,21 @@ ClientSignals.apply_headers(headers, signals, "Acme")
   `ClientSignals.classify_parent_name/1` are exposed for tests and
   advanced consumers that need the shared contract helpers.
 
+## Server-side: recording signals on request spans
+
+If your application already depends on `:plug` and `:opentelemetry_api`
+(e.g. a Phoenix app), `ClientSignals.Plug` reads the `Fly-Client-*`
+headers off incoming requests and attaches them as `fly.client.*`
+attributes on the current OTel span:
+
+```elixir
+# in your endpoint or router
+plug ClientSignals.Plug
+```
+
+This module is only defined when both dependencies are present, so it
+has no effect on consumers that only use the header-generation API above.
+
 ## Development
 
 ```sh
