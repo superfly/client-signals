@@ -79,13 +79,17 @@ else
 fi
 
 new_version="v$new_version"
+go_module_tag="go/${new_version}"
 
 echo "Bumping version from v${previous_version} to ${new_version}"
+echo "Go module tag: ${go_module_tag}"
 
 read -p "Are you sure? " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-  git tag -m "release ${new_version}" -a "$new_version" && git push "${ORIGIN}" tag "$new_version"
+  git tag -m "release ${new_version}" -a "$new_version"
+  git tag -m "release ${new_version}" -a "$go_module_tag"
+  git push "${ORIGIN}" tag "$new_version" tag "$go_module_tag"
   echo "done"
 fi
