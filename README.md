@@ -72,7 +72,3 @@ package to PyPI (`.github/workflows/publish-python.yml`, via PyPI trusted
 publishing — no API tokens). The workflow stamps the tag's version into
 `python/pyproject.toml` at build time. npm and Hex publishing are not
 automated yet.
-
-Publishing requires a one-time [PyPI trusted publisher](https://docs.pypi.org/trusted-publishers/)
-for the `client-signals` project pointing at `superfly/client-signals` and
-workflow `publish-python.yml`.
