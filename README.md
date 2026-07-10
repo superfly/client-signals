@@ -67,5 +67,12 @@ See [docs/signals.md](docs/signals.md) for signal rationale and
 
 ## Releases
 
-The existing tag workflow creates a GitHub release. npm, PyPI, and Hex
-publishing are not automated yet.
+Pushing a `vX.Y.Z` tag creates a GitHub release and publishes the Python
+package to PyPI (`.github/workflows/publish-python.yml`, via PyPI trusted
+publishing — no API tokens). The workflow stamps the tag's version into
+`python/pyproject.toml` at build time. npm and Hex publishing are not
+automated yet.
+
+Publishing requires a one-time [PyPI trusted publisher](https://docs.pypi.org/trusted-publishers/)
+for the `client-signals` project pointing at `superfly/client-signals` and
+workflow `publish-python.yml`.
