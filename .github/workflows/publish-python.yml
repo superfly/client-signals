@@ -1,0 +1,48 @@
+name: Publish Python to PyPI
+
+on:
+  push:
+    tags:
+      # Final releases only. Prerelease tags (vX.Y.Z-pre-N) use a format PyPI
+      # rejects under PEP 440, so they are intentionally not published here.
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build and publish client-signals to PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # OIDC for PyPI trusted publishing (no API tokens)
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Stamp version from tag
+        run: |
+          # Strip the leading 'v'; python/pyproject.toml ships a 0.0.0 placeholder.
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Publishing client-signals ${VERSION}"
+          sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" pyproject.toml
+
+      - name: Install build tooling and run tests
+        run: |
+          python -m pip install --upgrade pip build
+          python -m unittest
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist/
