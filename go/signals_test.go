@@ -28,6 +28,27 @@ func TestDetect_AgentAndSourceAreBothEmptyOrBothSet(t *testing.T) {
 	}
 }
 
+func TestOperator(t *testing.T) {
+	tests := []struct {
+		name string
+		s    Signals
+		want string
+	}{
+		{"ci wins over agent", Signals{CI: true, Agent: "claude-code", Interactive: true}, "ci"},
+		{"ci wins over interactive", Signals{CI: true, Interactive: true}, "ci"},
+		{"agent when not ci", Signals{Agent: "cursor", Interactive: true}, "agent"},
+		{"interactive when no ci or agent", Signals{Interactive: true}, "interactive"},
+		{"unknown when nothing matches", Signals{}, "unknown"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.s.Operator(); got != tt.want {
+				t.Errorf("Operator() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestDetectOnce_ComputesOnce(t *testing.T) {
 	resetCachedForTest()
 	t.Cleanup(resetCachedForTest)
