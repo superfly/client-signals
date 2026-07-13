@@ -66,6 +66,25 @@ func DetectOnce() Signals {
 	return detectOnce()
 }
 
+// Operator returns a single classification for the process's operator.
+// Precedence: ci > agent > interactive > unknown.
+//
+// This is a convenience for consumers that want one label describing who is
+// driving the process. The raw fields (CI, Agent, Interactive) remain
+// available for callers that need finer-grained logic.
+func (s Signals) Operator() string {
+	switch {
+	case s.CI:
+		return "ci"
+	case s.Agent != "":
+		return "agent"
+	case s.Interactive:
+		return "interactive"
+	default:
+		return "unknown"
+	}
+}
+
 // resetCachedForTest clears the cached signals so tests can exercise Detect
 // against a freshly modified environment. Only for use in this package's
 // own tests.
