@@ -42,6 +42,8 @@ sig.ApplyHeadersWithPrefix(header, "Acme")
 
 - `Detect() Signals` computes fresh signals.
 - `DetectOnce() Signals` computes and caches process-wide signals.
+- `Signals.Operator()` returns `ci`, `agent`, `interactive`, or `unknown`;
+  precedence is in that order.
 - `Signals.ApplyHeaders(http.Header)` applies `Fly-Client-*` headers.
 - `Signals.ApplyHeadersWithPrefix(http.Header, string)` applies custom
   prefix headers.

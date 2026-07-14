@@ -92,6 +92,21 @@ export function userAgentSuffix(signals) {
   return `(${suffix})`;
 }
 
+// operator returns one process-operator classification. Precedence is
+// ci > agent > interactive > unknown.
+export function operator(signals) {
+  if (signals.ci) {
+    return "ci";
+  }
+  if (signals.agent) {
+    return "agent";
+  }
+  if (signals.interactive) {
+    return "interactive";
+  }
+  return "unknown";
+}
+
 export function sanitizeInvokedBy(value) {
   const sanitized = String(value).trim().toLowerCase();
   if (sanitized.length === 0 || sanitized.length > MAX_INVOKED_BY_LEN) {

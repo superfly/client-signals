@@ -41,6 +41,8 @@ ClientSignals.apply_headers(headers, signals, "Acme")
 - `ClientSignals.apply_headers/3` merges signal headers into a map.
 - `ClientSignals.user_agent_suffix/1` returns the client-signals
   User-Agent token.
+- `ClientSignals.operator/1` returns `ci`, `agent`, `interactive`, or
+  `unknown`; precedence is in that order.
 - `ClientSignals.sanitize_invoked_by/1` and
   `ClientSignals.classify_parent_name/1` are exposed for tests and
   advanced consumers that need the shared contract helpers.

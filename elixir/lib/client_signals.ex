@@ -114,6 +114,16 @@ defmodule ClientSignals do
     "(" <> suffix <> ")"
   end
 
+  @doc "Returns one process-operator classification: ci > agent > interactive > unknown."
+  def operator(signals) do
+    cond do
+      field(signals, :ci) -> "ci"
+      field(signals, :agent) != "" -> "agent"
+      field(signals, :interactive) -> "interactive"
+      true -> "unknown"
+    end
+  end
+
   def sanitize_invoked_by(value) do
     sanitized = value |> String.trim() |> String.downcase()
 

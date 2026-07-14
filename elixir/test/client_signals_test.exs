@@ -28,6 +28,12 @@ defmodule ClientSignalsTest do
     end
   end
 
+  test "operator follows shared fixtures" do
+    for case <- fixture("operator-fixtures.json") do
+      assert ClientSignals.operator(case["signals"]) == case["want"], case["name"]
+    end
+  end
+
   test "apply_headers merges signal headers" do
     signals = fixture("header-fixtures.json") |> hd() |> Map.fetch!("signals")
     headers = ClientSignals.apply_headers(%{}, signals)

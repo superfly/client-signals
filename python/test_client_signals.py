@@ -37,6 +37,11 @@ class ClientSignalsTest(unittest.TestCase):
                 self.assertEqual(client_signals.headers_for(fixture["signals"], fixture["prefix"]), fixture["headers"])
                 self.assertEqual(client_signals.user_agent_suffix(fixture["signals"]), fixture["userAgentSuffix"])
 
+    def test_operator_fixtures(self):
+        for fixture in load_fixture("operator-fixtures.json"):
+            with self.subTest(fixture["name"]):
+                self.assertEqual(client_signals.operator(fixture["signals"]), fixture["want"])
+
     def test_apply_headers(self):
         signals = load_fixture("header-fixtures.json")[0]["signals"]
         headers = {}

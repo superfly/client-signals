@@ -119,3 +119,12 @@ and reuse the result. Detection must never run per HTTP request.
 The initial monorepo libraries expose header helpers in every language.
 The Go package also keeps its `http.RoundTripper` wrapper because it was
 part of the pre-monorepo API.
+
+## Operator classification
+
+Each language package also exposes a convenience operator classification with
+the finite values `ci`, `agent`, `interactive`, and `unknown`. Its precedence
+is `ci > agent > interactive > unknown`. `unknown` means the available
+signals did not identify an operator. This is only a simplified view of the
+raw signals and carries the same reliability caveats; it must not be used for
+gating or enforcement.

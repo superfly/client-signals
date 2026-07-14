@@ -38,6 +38,8 @@ client_signals.apply_headers(headers, signals, prefix="Acme")
 - `apply_headers(target, signals, prefix="Fly")` updates a mutable header
   mapping.
 - `user_agent_suffix(signals)` returns the client-signals User-Agent token.
+- `operator(signals)` returns `ci`, `agent`, `interactive`, or `unknown`;
+  precedence is in that order.
 - `Signals` is the dataclass returned by detection.
 - `sanitize_invoked_by(value)` and `classify_parent_name(raw)` are exposed
   for tests and advanced consumers that need the shared contract helpers.
