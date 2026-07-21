@@ -1,0 +1,32 @@
+[
+  {
+    "name": "ci wins over agent and interactive",
+    "signals": {"interactive": true, "parent": "other", "agent": "claude-code", "agentSource": "env:CLAUDECODE", "ci": true},
+    "want": "ci"
+  },
+  {
+    "name": "ci wins over interactive",
+    "signals": {"interactive": true, "parent": "other", "agent": "", "agentSource": "", "ci": true},
+    "want": "ci"
+  },
+  {
+    "name": "agent wins over interactive",
+    "signals": {"interactive": true, "parent": "other", "agent": "cursor", "agentSource": "env:CURSOR_AGENT", "ci": false},
+    "want": "agent"
+  },
+  {
+    "name": "interactive without ci or agent",
+    "signals": {"interactive": true, "parent": "other", "agent": "", "agentSource": "", "ci": false},
+    "want": "interactive"
+  },
+  {
+    "name": "unknown with an informative parent signal only",
+    "signals": {"interactive": false, "parent": "shell", "agent": "", "agentSource": "", "ci": false},
+    "want": "unknown"
+  },
+  {
+    "name": "unknown without an operator signal",
+    "signals": {"interactive": false, "parent": "", "agent": "", "agentSource": "", "ci": false},
+    "want": "unknown"
+  }
+]

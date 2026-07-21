@@ -103,6 +103,17 @@ def user_agent_suffix(signals: Signals | dict[str, Any]) -> str:
     return f"({suffix})"
 
 
+def operator(signals: Signals | dict[str, Any]) -> str:
+    """Return one process-operator classification: ci > agent > interactive > unknown."""
+    if _field(signals, "ci"):
+        return "ci"
+    if _field(signals, "agent"):
+        return "agent"
+    if _field(signals, "interactive"):
+        return "interactive"
+    return "unknown"
+
+
 def sanitize_invoked_by(value: str) -> tuple[str, bool]:
     sanitized = value.strip().lower()
     if not sanitized or len(sanitized) > MAX_INVOKED_BY_LEN:

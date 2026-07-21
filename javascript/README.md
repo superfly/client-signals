@@ -39,6 +39,8 @@ Node-style objects with `setHeader`.
 - `applyHeaders(target, signals, prefix = "Fly")` writes headers to a
   target.
 - `userAgentSuffix(signals)` returns the client-signals User-Agent token.
+- `operator(signals)` returns `ci`, `agent`, `interactive`, or `unknown`;
+  precedence is in that order.
 - `sanitizeInvokedBy(value)` and `classifyParentName(raw)` are exported for
   tests and advanced consumers that need the shared contract helpers.
 

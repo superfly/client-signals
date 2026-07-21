@@ -12,6 +12,7 @@ import {
   headersFor,
   isInteractiveFileForTest,
   loadJSONFixture,
+  operator,
   resetCachedForTest,
   sanitizeInvokedBy,
   userAgentSuffix,
@@ -21,6 +22,7 @@ const markers = loadJSONFixture(new URL("../../spec/markers.json", import.meta.u
 const sanitizeFixtures = loadJSONFixture(new URL("../../spec/sanitize-fixtures.json", import.meta.url));
 const parentFixtures = loadJSONFixture(new URL("../../spec/parent-fixtures.json", import.meta.url));
 const headerFixtures = loadJSONFixture(new URL("../../spec/header-fixtures.json", import.meta.url));
+const operatorFixtures = loadJSONFixture(new URL("../../spec/operator-fixtures.json", import.meta.url));
 
 test("known markers match the shared spec", () => {
   assert.deepEqual(KNOWN_MARKERS, markers);
@@ -44,6 +46,12 @@ test("headersFor and userAgentSuffix follow shared fixtures", () => {
   for (const fixture of headerFixtures) {
     assert.deepEqual(headersFor(fixture.signals, fixture.prefix), fixture.headers, fixture.name);
     assert.equal(userAgentSuffix(fixture.signals), fixture.userAgentSuffix, fixture.name);
+  }
+});
+
+test("operator follows shared fixtures", () => {
+  for (const fixture of operatorFixtures) {
+    assert.equal(operator(fixture.signals), fixture.want, fixture.name);
   }
 });
 

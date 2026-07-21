@@ -1,6 +1,11 @@
 package clientsignals
 
-import "testing"
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestDetect_Composition(t *testing.T) {
 	t.Setenv("FLY_INVOKED_BY", "test-harness")
@@ -28,22 +33,25 @@ func TestDetect_AgentAndSourceAreBothEmptyOrBothSet(t *testing.T) {
 	}
 }
 
-func TestOperator(t *testing.T) {
-	tests := []struct {
-		name string
-		s    Signals
-		want string
-	}{
-		{"ci wins over agent", Signals{CI: true, Agent: "claude-code", Interactive: true}, "ci"},
-		{"ci wins over interactive", Signals{CI: true, Interactive: true}, "ci"},
-		{"agent when not ci", Signals{Agent: "cursor", Interactive: true}, "agent"},
-		{"interactive when no ci or agent", Signals{Interactive: true}, "interactive"},
-		{"unknown when nothing matches", Signals{}, "unknown"},
+func TestOperator_SharedFixtures(t *testing.T) {
+	type fixture struct {
+		Name    string  `json:"name"`
+		Signals Signals `json:"signals"`
+		Want    string  `json:"want"`
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.s.Operator(); got != tt.want {
-				t.Errorf("Operator() = %q, want %q", got, tt.want)
+
+	data, err := os.ReadFile(filepath.Join("..", "spec", "operator-fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures []fixture
+	if err := json.Unmarshal(data, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	for _, fixture := range fixtures {
+		t.Run(fixture.Name, func(t *testing.T) {
+			if got := fixture.Signals.Operator(); got != fixture.Want {
+				t.Errorf("Operator() = %q, want %q", got, fixture.Want)
 			}
 		})
 	}
