@@ -41,8 +41,18 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
           not is_nil(configured_request_observer) or not is_nil(route_template_provider)
 
       request_observer =
-        if metrics_configured? do
-          configured_request_observer || {ClientSignals.RequestMetrics, :observe, []}
+        cond do
+          not metrics_configured? ->
+            nil
+
+          not is_nil(configured_request_observer) ->
+            configured_request_observer
+
+          Code.ensure_loaded?(ClientSignals.RequestMetrics) ->
+            {ClientSignals.RequestMetrics, :observe, []}
+
+          true ->
+            nil
         end
 
       if metrics_configured? and
@@ -51,6 +61,11 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
         raise ArgumentError,
               "service, tracked_route_prefixes, and route_template_provider are all required " <>
                 "when client-signal request observation is enabled"
+      end
+
+      if metrics_configured? and is_nil(request_observer) do
+        raise ArgumentError,
+              "request_observer is required when :telemetry is unavailable"
       end
 
       %{

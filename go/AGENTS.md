@@ -21,7 +21,9 @@ Key files:
 
 ## Constraints
 
-- No new external dependencies beyond `golang.org/x/sys`.
+- Runtime dependencies are limited to `golang.org/x/sys` for signal detection
+  and `github.com/prometheus/client_golang` for the canonical server request
+  collector. Do not add further dependencies without asking.
 - Do not shell out for parent-process lookup.
 - `DetectOnce` must remain cached with `sync.OnceValue`.
 - `ClientSignalsTransport` must not perform detection per request.
