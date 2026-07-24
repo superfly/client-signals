@@ -1,9 +1,9 @@
 # Server-side request metric contract
 
 This document defines the shared, language-neutral contract for classifying
-incoming `Fly-Client-*` headers and selecting bounded API-route labels.
+incoming `Fly-Client-*` headers and selecting bounded route labels.
 Implementations may expose different APIs, but must produce the results in
-`request-classification-fixtures.json` and `api-route-fixtures.json`.
+`request-classification-fixtures.json` and `route-fixtures.json`.
 
 This contract is for aggregate observability only. Client signals are
 self-reported and must not be used for authentication, authorization,
@@ -11,19 +11,19 @@ rate-limiting, enforcement, or other per-request trust decisions.
 
 ## Canonical counter
 
-Consuming API services should expose one Prometheus counter:
+Consuming services should expose one Prometheus counter:
 
 ```text
-fly_api_client_requests_total{
+fly_client_signals_requests_total{
   service,
-  api_route,
+  route,
   operator,
   agent
 }
 ```
 
 The library does not register this counter. Metric registration, the bounded
-`service` value, the route-template provider, and the tracked API prefixes
+`service` value, the route-template provider, and the tracked route prefixes
 belong to each consuming service.
 
 `parent` and `agent_source` are deliberately not metric labels. Parent-process
@@ -73,7 +73,7 @@ visibility into CI requests driven by known agents.
 `Fly-Client-Parent` and `Fly-Client-Agent-Source` must not affect either
 classification field.
 
-## API route selection
+## Route selection
 
 The route selector receives:
 
@@ -84,8 +84,8 @@ The route selector receives:
 
 If a route template is present, prefix selection must use the template. The
 raw request path must not override a present template. This prevents a
-catch-all route outside the selected API namespace from being counted as a
-specific API route.
+catch-all route outside the selected namespace from being counted as a
+specific tracked route.
 
 If no route template is present, the raw request path may be used only to
 decide whether the request falls under a tracked prefix. It must never be
@@ -108,7 +108,7 @@ Requests outside the configured prefixes are not observed.
 
 ## Cardinality requirements
 
-- Never place a raw request path in `api_route`.
+- Never place a raw request path in `route`.
 - Never place an unknown caller-provided agent name in `agent`; use `other`.
 - Keep `service` to one bounded value per service deployment.
 - Do not add Parent or agent-source values as labels.

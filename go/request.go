@@ -72,11 +72,11 @@ func ClassifyRequestHeaders(header http.Header) RequestClassification {
 	}
 }
 
-// TrackedAPIRoute returns the bounded API-route metric label for a request and
+// TrackedRoute returns the bounded route metric label for a request and
 // whether it should be recorded. A matched route template is preferred. For an
 // unmatched request, requestPath is used only to determine whether the request
 // targeted a tracked prefix and is never included in the returned label.
-func TrackedAPIRoute(method, routeTemplate, requestPath string, prefixes []string) (string, bool) {
+func TrackedRoute(method, routeTemplate, requestPath string, prefixes []string) (string, bool) {
 	method = strings.ToUpper(strings.TrimSpace(method))
 	if method == "" {
 		method = "UNKNOWN"

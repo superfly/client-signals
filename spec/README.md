@@ -9,7 +9,7 @@ This directory contains shared fixtures used by the language packages:
 - `operator-fixtures.json` covers the shared process-operator classification.
 - `request-metrics.md` defines the server-side request metric contract.
 - `request-classification-fixtures.json` covers bounded request classification.
-- `api-route-fixtures.json` covers route-template labels and prefix filtering.
+- `route-fixtures.json` covers route-template labels and prefix filtering.
 
 Language packages may mirror the marker table in native source for
 dependency-free runtime behavior, but tests should compare that mirror

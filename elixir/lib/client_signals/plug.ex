@@ -118,13 +118,13 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
       register_before_send(conn, fn conn ->
         route_template = route_template(opts.route_template_provider, conn)
 
-        case ClientSignals.Request.tracked_api_route(
+        case ClientSignals.Request.tracked_route(
                conn.method,
                route_template,
                conn.request_path,
                opts.tracked_route_prefixes
              ) do
-          {api_route, true} ->
+          {route, true} ->
             classification =
               ClientSignals.Request.classify(
                 first_req_header(conn, @interactive_header),
@@ -135,7 +135,7 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
             labels =
               classification
               |> Map.put(:service, opts.service)
-              |> Map.put(:api_route, api_route)
+              |> Map.put(:route, route)
 
             notify_request_observer(opts.request_observer, labels)
             conn

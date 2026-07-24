@@ -96,7 +96,7 @@ defmodule ClientSignals.PlugTest do
       assert ClientSignalsPlug.call(conn, ClientSignalsPlug.init([])) == conn
     end
 
-    test "observes configured API routes after routing" do
+    test "observes configured routes after routing" do
       opts =
         ClientSignalsPlug.init(
           service: "sprites-api",
@@ -118,7 +118,7 @@ defmodule ClientSignals.PlugTest do
       assert_receive {:observed_request,
                       %{
                         service: "sprites-api",
-                        api_route: "GET /v1/sprites/:name",
+                        route: "GET /v1/sprites/:name",
                         operator: "agent",
                         agent: "codex"
                       }}
@@ -156,7 +156,7 @@ defmodule ClientSignals.PlugTest do
       assert_receive {:observed_request,
                       %{
                         service: "ui-ex",
-                        api_route: "DELETE unmatched",
+                        route: "DELETE unmatched",
                         operator: "uninstrumented",
                         agent: "none"
                       }}

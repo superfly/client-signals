@@ -14,7 +14,7 @@ type requestClassificationFixture struct {
 	} `json:"want"`
 }
 
-type apiRouteFixture struct {
+type routeFixture struct {
 	Name          string   `json:"name"`
 	Method        string   `json:"method"`
 	RouteTemplate string   `json:"routeTemplate"`
@@ -51,18 +51,18 @@ func TestClassifyRequestHeaders_SharedFixtures(t *testing.T) {
 	}
 }
 
-func TestTrackedAPIRoute_SharedFixtures(t *testing.T) {
+func TestTrackedRoute_SharedFixtures(t *testing.T) {
 	t.Parallel()
 
-	var fixtures []apiRouteFixture
-	readSpecFixture(t, "api-route-fixtures.json", &fixtures)
+	var fixtures []routeFixture
+	readSpecFixture(t, "route-fixtures.json", &fixtures)
 
 	for _, fixture := range fixtures {
 		fixture := fixture
 		t.Run(fixture.Name, func(t *testing.T) {
 			t.Parallel()
 
-			got, tracked := TrackedAPIRoute(
+			got, tracked := TrackedRoute(
 				fixture.Method,
 				fixture.RouteTemplate,
 				fixture.RequestPath,
@@ -70,7 +70,7 @@ func TestTrackedAPIRoute_SharedFixtures(t *testing.T) {
 			)
 			if got != fixture.WantRoute || tracked != fixture.Tracked {
 				t.Fatalf(
-					"TrackedAPIRoute() = (%q, %t), want (%q, %t)",
+					"TrackedRoute() = (%q, %t), want (%q, %t)",
 					got,
 					tracked,
 					fixture.WantRoute,

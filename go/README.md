@@ -54,8 +54,8 @@ sig.ApplyHeadersWithPrefix(header, "Acme")
 - `ClassifyRequestHeaders(http.Header)` returns bounded `operator` and `agent`
   values for server-side metrics. `Fly-Client-Interactive` is the
   instrumentation sentinel; Parent is not used.
-- `TrackedAPIRoute(method, routeTemplate, requestPath, prefixes)` selects
-  configured API prefixes and returns a bounded `"METHOD /route/{template}"`
+- `TrackedRoute(method, routeTemplate, requestPath, prefixes)` selects
+  configured route prefixes and returns a bounded `"METHOD /route/{template}"`
   label. Raw paths are never returned for unmatched requests.
 
 ## Server-side request metrics

@@ -63,18 +63,18 @@ This module is only defined when both dependencies are present, so it
 has no effect on consumers that only use the header-generation API above.
 
 The Plug can also invoke a caller-provided observer for requests whose matched
-route template falls under configured API prefixes:
+route template falls under configured prefixes:
 
 ```elixir
 plug ClientSignals.Plug,
   service: "my-api",
   tracked_route_prefixes: ["/api/v1"],
-  request_observer: {MyApp.ClientSignals, :observe_api_request, []},
+  request_observer: {MyApp.ClientSignals, :observe_request, []},
   route_template_provider: {MyApp.ClientSignals, :route_template, []}
 ```
 
 The observer receives a map containing the bounded keys `service`,
-`api_route`, `operator`, and `agent`. `api_route` combines the uppercase HTTP
+`route`, `operator`, and `agent`. `route` combines the uppercase HTTP
 method with the matched route template. Unmatched requests under a configured
 prefix use `"METHOD unmatched"`; raw request paths are never forwarded.
 
@@ -84,7 +84,7 @@ finite agent name, `other`, or `none`. Parent is deliberately not used for
 classification.
 
 The package does not depend on or configure a metrics library. The observer,
-route-template provider, metric name, service name, and tracked API prefixes
+route-template provider, metric name, service name, and tracked route prefixes
 remain owned by each consuming service. For Phoenix, the route-template
 provider can use `Phoenix.Router.route_info/4` with the application's router.
 

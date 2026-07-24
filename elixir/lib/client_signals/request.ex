@@ -1,6 +1,6 @@
 defmodule ClientSignals.Request do
   @moduledoc """
-  Bounded server-side classification and API-route helpers for incoming
+  Bounded server-side classification and route helpers for incoming
   client-signal headers.
 
   The returned operator and agent values are safe to use as metric labels.
@@ -44,12 +44,12 @@ defmodule ClientSignals.Request do
   end
 
   @doc """
-  Returns a bounded API-route metric label and whether the request is tracked.
+  Returns a bounded route metric label and whether the request is tracked.
 
   A matched route template is preferred. For an unmatched request, the raw
   request path is used only for prefix selection and is never returned.
   """
-  def tracked_api_route(method, route_template, request_path, prefixes) do
+  def tracked_route(method, route_template, request_path, prefixes) do
     method =
       case method |> to_string() |> String.trim() |> String.upcase() do
         "" -> "UNKNOWN"

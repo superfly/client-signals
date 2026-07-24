@@ -21,9 +21,9 @@ defmodule ClientSignals.RequestTest do
     end
   end
 
-  test "tracked_api_route/4 follows shared route fixtures" do
-    for case <- fixture("api-route-fixtures.json") do
-      assert Request.tracked_api_route(
+  test "tracked_route/4 follows shared route fixtures" do
+    for case <- fixture("route-fixtures.json") do
+      assert Request.tracked_route(
                case["method"],
                case["routeTemplate"],
                case["requestPath"],

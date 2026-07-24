@@ -36,7 +36,7 @@
     "tracked": true
   },
   {
-    "name": "unmatched api path gets bounded label",
+    "name": "unmatched tracked path gets bounded label",
     "method": "get",
     "requestPath": "/api/v1/not-a-route/123",
     "prefixes": ["/api/v1"],
@@ -61,7 +61,7 @@
     "tracked": false
   },
   {
-    "name": "unmatched non-api path is ignored",
+    "name": "unmatched path outside tracked prefixes is ignored",
     "method": "GET",
     "requestPath": "/dashboard",
     "prefixes": ["/api/v1"],
