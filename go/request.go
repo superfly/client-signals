@@ -86,6 +86,7 @@ func TrackedAPIRoute(method, routeTemplate, requestPath string, prefixes []strin
 		if matchesRoutePrefix(routeTemplate, prefixes) {
 			return method + " " + routeTemplate, true
 		}
+
 		return "", false
 	}
 
@@ -117,6 +118,7 @@ func parseRequestBool(raw string) (bool, bool) {
 	}
 
 	value, err := strconv.ParseBool(strings.TrimSpace(raw))
+
 	return value, err == nil
 }
 
@@ -127,6 +129,7 @@ func matchesRoutePrefix(path string, prefixes []string) bool {
 			if strings.HasPrefix(path, "/") {
 				return true
 			}
+
 			continue
 		}
 		if path == prefix || strings.HasPrefix(path, prefix+"/") {
