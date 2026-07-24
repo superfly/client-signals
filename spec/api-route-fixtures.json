@@ -1,0 +1,89 @@
+[
+  {
+    "name": "matched route combines normalized method and template",
+    "method": " post ",
+    "routeTemplate": "/v1/apps/:app/machines/:id",
+    "requestPath": "/v1/apps/my-app/machines/123",
+    "prefixes": ["/v1"],
+    "wantRoute": "POST /v1/apps/:app/machines/:id",
+    "tracked": true
+  },
+  {
+    "name": "exact prefix route is tracked",
+    "method": "GET",
+    "routeTemplate": "/v1",
+    "requestPath": "/v1",
+    "prefixes": ["/v1"],
+    "wantRoute": "GET /v1",
+    "tracked": true
+  },
+  {
+    "name": "prefix matching uses path boundaries",
+    "method": "GET",
+    "routeTemplate": "/v10/apps",
+    "requestPath": "/v10/apps",
+    "prefixes": ["/v1"],
+    "wantRoute": "",
+    "tracked": false
+  },
+  {
+    "name": "configured trailing slash is normalized",
+    "method": "PATCH",
+    "routeTemplate": "/api/v1/apps/:app",
+    "requestPath": "/api/v1/apps/example",
+    "prefixes": ["/api/v1/"],
+    "wantRoute": "PATCH /api/v1/apps/:app",
+    "tracked": true
+  },
+  {
+    "name": "unmatched api path gets bounded label",
+    "method": "get",
+    "requestPath": "/api/v1/not-a-route/123",
+    "prefixes": ["/api/v1"],
+    "wantRoute": "GET unmatched",
+    "tracked": true
+  },
+  {
+    "name": "unmatched raw path is never returned",
+    "method": "DELETE",
+    "requestPath": "/v1/apps/secret-instance-id",
+    "prefixes": ["/v1"],
+    "wantRoute": "DELETE unmatched",
+    "tracked": true
+  },
+  {
+    "name": "present catch-all template controls prefix selection",
+    "method": "GET",
+    "routeTemplate": "/api/*path",
+    "requestPath": "/api/v1/not-a-route",
+    "prefixes": ["/api/v1"],
+    "wantRoute": "",
+    "tracked": false
+  },
+  {
+    "name": "unmatched non-api path is ignored",
+    "method": "GET",
+    "requestPath": "/dashboard",
+    "prefixes": ["/api/v1"],
+    "wantRoute": "",
+    "tracked": false
+  },
+  {
+    "name": "root prefix tracks absolute paths",
+    "method": "",
+    "routeTemplate": "/health",
+    "requestPath": "/health",
+    "prefixes": ["/"],
+    "wantRoute": "UNKNOWN /health",
+    "tracked": true
+  },
+  {
+    "name": "empty prefix list tracks nothing",
+    "method": "GET",
+    "routeTemplate": "/v1/apps",
+    "requestPath": "/v1/apps",
+    "prefixes": [],
+    "wantRoute": "",
+    "tracked": false
+  }
+]

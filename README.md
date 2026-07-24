@@ -33,7 +33,8 @@ incoming headers into bounded metric-label values. The Elixir Plug can invoke
 a caller-provided observer for selected API route prefixes after routing. The
 package deliberately does not register or publish metrics itself: metric
 libraries, service names, and tracked route prefixes belong to each consuming
-service.
+service. See [spec/request-metrics.md](spec/request-metrics.md) for the shared
+classification, labeling, and cardinality contract.
 
 ## Shared contract
 

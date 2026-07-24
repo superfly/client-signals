@@ -5,174 +5,76 @@ import (
 	"testing"
 )
 
-func TestClassifyRequestHeaders(t *testing.T) {
+type requestClassificationFixture struct {
+	Name    string            `json:"name"`
+	Headers map[string]string `json:"headers"`
+	Want    struct {
+		Operator string `json:"operator"`
+		Agent    string `json:"agent"`
+	} `json:"want"`
+}
+
+type apiRouteFixture struct {
+	Name          string   `json:"name"`
+	Method        string   `json:"method"`
+	RouteTemplate string   `json:"routeTemplate"`
+	RequestPath   string   `json:"requestPath"`
+	Prefixes      []string `json:"prefixes"`
+	WantRoute     string   `json:"wantRoute"`
+	Tracked       bool     `json:"tracked"`
+}
+
+func TestClassifyRequestHeaders_SharedFixtures(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name   string
-		header http.Header
-		want   RequestClassification
-	}{
-		{
-			name:   "missing instrumentation sentinel",
-			header: http.Header{"Fly-Client-Agent": {"codex"}},
-			want: RequestClassification{
-				Operator: RequestOperatorUninstrumented,
-				Agent:    RequestAgentNone,
-			},
-		},
-		{
-			name: "invalid instrumentation sentinel",
-			header: http.Header{
-				"Fly-Client-Interactive": {"maybe"},
-				"Fly-Client-Agent":       {"codex"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorUninstrumented,
-				Agent:    RequestAgentNone,
-			},
-		},
-		{
-			name: "CI takes precedence and preserves agent",
-			header: http.Header{
-				"Fly-Client-Interactive": {"false"},
-				"Fly-Client-Agent":       {"codex"},
-				"Fly-Client-Ci":          {"true"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorCI,
-				Agent:    "codex",
-			},
-		},
-		{
-			name: "known agent",
-			header: http.Header{
-				"Fly-Client-Interactive": {"true"},
-				"Fly-Client-Agent":       {"claude-code"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorAgent,
-				Agent:    "claude-code",
-			},
-		},
-		{
-			name: "unknown sanitized declaration is bounded",
-			header: http.Header{
-				"Fly-Client-Interactive": {"false"},
-				"Fly-Client-Agent":       {"my-agent"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorAgent,
-				Agent:    RequestAgentOther,
-			},
-		},
-		{
-			name: "invalid agent is ignored",
-			header: http.Header{
-				"Fly-Client-Interactive": {"false"},
-				"Fly-Client-Agent":       {"bad agent value"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorAutomatedUnattributed,
-				Agent:    RequestAgentNone,
-			},
-		},
-		{
-			name: "interactive",
-			header: http.Header{
-				"Fly-Client-Interactive": {"true"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorInteractive,
-				Agent:    RequestAgentNone,
-			},
-		},
-		{
-			name: "automated unattributed",
-			header: http.Header{
-				"Fly-Client-Interactive": {"false"},
-			},
-			want: RequestClassification{
-				Operator: RequestOperatorAutomatedUnattributed,
-				Agent:    RequestAgentNone,
-			},
-		},
-	}
+	var fixtures []requestClassificationFixture
+	readSpecFixture(t, "request-classification-fixtures.json", &fixtures)
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
+	for _, fixture := range fixtures {
+		fixture := fixture
+		t.Run(fixture.Name, func(t *testing.T) {
 			t.Parallel()
-			if got := ClassifyRequestHeaders(tt.header); got != tt.want {
-				t.Fatalf("ClassifyRequestHeaders() = %#v, want %#v", got, tt.want)
+
+			header := make(http.Header, len(fixture.Headers))
+			for name, value := range fixture.Headers {
+				header.Set(name, value)
+			}
+
+			want := RequestClassification{
+				Operator: fixture.Want.Operator,
+				Agent:    fixture.Want.Agent,
+			}
+			if got := ClassifyRequestHeaders(header); got != want {
+				t.Fatalf("ClassifyRequestHeaders() = %#v, want %#v", got, want)
 			}
 		})
 	}
 }
 
-func TestTrackedAPIRoute(t *testing.T) {
+func TestTrackedAPIRoute_SharedFixtures(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name          string
-		method        string
-		routeTemplate string
-		requestPath   string
-		prefixes      []string
-		want          string
-		wantTracked   bool
-	}{
-		{
-			name:          "matched route",
-			method:        "post",
-			routeTemplate: "/v1/apps/{app}/machines/{id}",
-			requestPath:   "/v1/apps/my-app/machines/123",
-			prefixes:      []string{"/v1"},
-			want:          "POST /v1/apps/{app}/machines/{id}",
-			wantTracked:   true,
-		},
-		{
-			name:          "prefix boundary",
-			method:        "GET",
-			routeTemplate: "/v10/apps",
-			requestPath:   "/v10/apps",
-			prefixes:      []string{"/v1"},
-			wantTracked:   false,
-		},
-		{
-			name:        "unmatched API path",
-			method:      "get",
-			requestPath: "/api/v1/not-a-route/123",
-			prefixes:    []string{"/api/v1"},
-			want:        "GET unmatched",
-			wantTracked: true,
-		},
-		{
-			name:        "unmatched non-API path",
-			method:      "GET",
-			requestPath: "/dashboard",
-			prefixes:    []string{"/api/v1"},
-			wantTracked: false,
-		},
-	}
+	var fixtures []apiRouteFixture
+	readSpecFixture(t, "api-route-fixtures.json", &fixtures)
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
+	for _, fixture := range fixtures {
+		fixture := fixture
+		t.Run(fixture.Name, func(t *testing.T) {
 			t.Parallel()
+
 			got, tracked := TrackedAPIRoute(
-				tt.method,
-				tt.routeTemplate,
-				tt.requestPath,
-				tt.prefixes,
+				fixture.Method,
+				fixture.RouteTemplate,
+				fixture.RequestPath,
+				fixture.Prefixes,
 			)
-			if got != tt.want || tracked != tt.wantTracked {
+			if got != fixture.WantRoute || tracked != fixture.Tracked {
 				t.Fatalf(
 					"TrackedAPIRoute() = (%q, %t), want (%q, %t)",
 					got,
 					tracked,
-					tt.want,
-					tt.wantTracked,
+					fixture.WantRoute,
+					fixture.Tracked,
 				)
 			}
 		})
