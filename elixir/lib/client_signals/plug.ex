@@ -33,19 +33,23 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
     def init(opts) do
       service = Keyword.get(opts, :service)
       tracked_route_prefixes = Keyword.get(opts, :tracked_route_prefixes, [])
-      request_observer = Keyword.get(opts, :request_observer)
+      configured_request_observer = Keyword.get(opts, :request_observer)
       route_template_provider = Keyword.get(opts, :route_template_provider)
 
       metrics_configured? =
-        not is_nil(service) or tracked_route_prefixes != [] or not is_nil(request_observer) or
-          not is_nil(route_template_provider)
+        not is_nil(service) or tracked_route_prefixes != [] or
+          not is_nil(configured_request_observer) or not is_nil(route_template_provider)
+
+      request_observer =
+        if metrics_configured? do
+          configured_request_observer || {ClientSignals.RequestMetrics, :observe, []}
+        end
 
       if metrics_configured? and
            (not is_binary(service) or service == "" or tracked_route_prefixes == [] or
-              is_nil(request_observer) or is_nil(route_template_provider)) do
+              is_nil(route_template_provider)) do
         raise ArgumentError,
-              "service, tracked_route_prefixes, request_observer, and " <>
-                "route_template_provider are all required " <>
+              "service, tracked_route_prefixes, and route_template_provider are all required " <>
                 "when client-signal request observation is enabled"
       end
 

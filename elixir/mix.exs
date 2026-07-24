@@ -19,14 +19,14 @@ defmodule ClientSignals.MixProject do
     ]
   end
 
-  # :plug and :opentelemetry_api are optional: the core signal-detection API
-  # has no runtime dependencies, but including apps that already depend on
-  # both (e.g. a Phoenix app) can use ClientSignals.Plug, which is only
-  # defined when both are loaded. See elixir/AGENTS.md.
+  # Server-side integrations remain optional so the core signal-detection API
+  # has no runtime dependencies. See elixir/AGENTS.md.
   defp deps do
     [
       {:plug, "~> 1.14", optional: true},
-      {:opentelemetry_api, "~> 1.4", optional: true}
+      {:opentelemetry_api, "~> 1.4", optional: true},
+      {:telemetry, "~> 1.0", optional: true},
+      {:prom_ex, "~> 1.11", optional: true}
     ]
   end
 

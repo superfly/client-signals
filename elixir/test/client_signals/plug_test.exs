@@ -124,6 +124,42 @@ defmodule ClientSignals.PlugTest do
                       }}
     end
 
+    test "uses the canonical telemetry observer by default" do
+      handler_id = {__MODULE__, self()}
+
+      :telemetry.attach(
+        handler_id,
+        [:client_signals, :request],
+        &__MODULE__.handle_event/4,
+        self()
+      )
+
+      on_exit(fn -> :telemetry.detach(handler_id) end)
+
+      opts =
+        ClientSignalsPlug.init(
+          service: "ui-ex",
+          tracked_route_prefixes: ["/api/v1"],
+          route_template_provider:
+            {__MODULE__, :route_template, ["/api/v1/organizations/:org_slug"]}
+        )
+
+      build_conn([{"fly-client-interactive", "true"}])
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      assert_receive {
+        [:client_signals, :request],
+        %{count: 1},
+        %{
+          service: "ui-ex",
+          route: "GET /api/v1/organizations/:org_slug",
+          operator: "interactive",
+          agent: "none"
+        }
+      }
+    end
+
     test "does not observe routes outside the configured prefixes" do
       opts =
         ClientSignalsPlug.init(
@@ -171,4 +207,8 @@ defmodule ClientSignals.PlugTest do
 
   def observe_request(labels, test_pid), do: send(test_pid, {:observed_request, labels})
   def route_template(_conn, route_template), do: route_template
+
+  def handle_event(event, measurements, metadata, test_pid) do
+    send(test_pid, {event, measurements, metadata})
+  end
 end
