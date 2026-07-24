@@ -1,0 +1,92 @@
+[
+  {
+    "name": "missing instrumentation sentinel",
+    "headers": {
+      "Fly-Client-Agent": "codex",
+      "Fly-Client-Parent": "node"
+    },
+    "want": {"operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "invalid instrumentation sentinel",
+    "headers": {
+      "Fly-Client-Interactive": "maybe",
+      "Fly-Client-Agent": "codex"
+    },
+    "want": {"operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "ci takes precedence and preserves known agent",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "codex",
+      "Fly-Client-Agent-Source": "env:CODEX_THREAD_ID",
+      "Fly-Client-CI": "true"
+    },
+    "want": {"operator": "ci", "agent": "codex"}
+  },
+  {
+    "name": "ci preserves bounded unknown agent",
+    "headers": {
+      "Fly-Client-Interactive": "0",
+      "Fly-Client-Agent": "my-agent",
+      "Fly-Client-CI": "1"
+    },
+    "want": {"operator": "ci", "agent": "other"}
+  },
+  {
+    "name": "known agent takes precedence over interactive",
+    "headers": {
+      "Fly-Client-Interactive": "TRUE",
+      "Fly-Client-Agent": "Claude-Code"
+    },
+    "want": {"operator": "agent", "agent": "claude-code"}
+  },
+  {
+    "name": "unknown sanitized declaration is bounded",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "my-agent"
+    },
+    "want": {"operator": "agent", "agent": "other"}
+  },
+  {
+    "name": "invalid agent is ignored",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "bad agent value"
+    },
+    "want": {"operator": "automated_unattributed", "agent": "none"}
+  },
+  {
+    "name": "interactive without ci or agent",
+    "headers": {
+      "Fly-Client-Interactive": "t"
+    },
+    "want": {"operator": "interactive", "agent": "none"}
+  },
+  {
+    "name": "automated unattributed",
+    "headers": {
+      "Fly-Client-Interactive": "f"
+    },
+    "want": {"operator": "automated_unattributed", "agent": "none"}
+  },
+  {
+    "name": "invalid ci is not true",
+    "headers": {
+      "Fly-Client-Interactive": "true",
+      "Fly-Client-CI": "maybe"
+    },
+    "want": {"operator": "interactive", "agent": "none"}
+  },
+  {
+    "name": "parent and agent source do not classify automation",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Parent": "node",
+      "Fly-Client-Agent-Source": "env:CODEX_THREAD_ID"
+    },
+    "want": {"operator": "automated_unattributed", "agent": "none"}
+  }
+]

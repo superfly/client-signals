@@ -40,11 +40,15 @@ defmodule ClientSignals do
       "values" => ["vscode"]
     }
   ]
+  @known_agents @known_markers
+                |> Enum.map(& &1["agent"])
+                |> Enum.uniq()
 
   defstruct interactive: false, parent: "other", agent: "", agent_source: "", ci: false
 
   def default_header_prefix, do: @default_header_prefix
   def known_markers, do: @known_markers
+  def known_agents, do: @known_agents
 
   def detect do
     {agent, source} = detect_agent()

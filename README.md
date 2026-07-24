@@ -28,6 +28,15 @@ detect signals once, build/apply `{prefix}-Client-*` headers, and build the
 client-signals User-Agent suffix. See each package README for language
 specific installation, API names, and examples.
 
+The Go and Elixir packages also expose server-side helpers that classify
+incoming headers into bounded metric-label values. The Go package provides the
+canonical Prometheus request collector, while the Elixir package provides the
+canonical telemetry event and PromEx plugin. Consuming services remain
+responsible for metric registration, service names, route templates, and
+tracked route prefixes. See
+[spec/request-metrics.md](spec/request-metrics.md) for the shared
+classification, labeling, and cardinality contract.
+
 ## Shared contract
 
 All implementations must preserve these invariants:

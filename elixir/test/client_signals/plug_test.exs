@@ -95,5 +95,120 @@ defmodule ClientSignals.PlugTest do
 
       assert ClientSignalsPlug.call(conn, ClientSignalsPlug.init([])) == conn
     end
+
+    test "observes configured routes after routing" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "sprites-api",
+          tracked_route_prefixes: ["/v1", "/api/v1"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/v1/sprites/:name"]}
+        )
+
+      conn =
+        build_conn([
+          {"fly-client-interactive", "false"},
+          {"fly-client-agent", "codex"}
+        ])
+        |> ClientSignalsPlug.call(opts)
+        |> Plug.Conn.send_resp(200, "ok")
+
+      assert conn.state == :sent
+
+      assert_receive {:observed_request,
+                      %{
+                        service: "sprites-api",
+                        route: "GET /v1/sprites/:name",
+                        operator: "agent",
+                        agent: "codex"
+                      }}
+    end
+
+    test "uses the canonical telemetry observer by default" do
+      handler_id = {__MODULE__, self()}
+
+      :telemetry.attach(
+        handler_id,
+        [:client_signals, :request],
+        &__MODULE__.handle_event/4,
+        self()
+      )
+
+      on_exit(fn -> :telemetry.detach(handler_id) end)
+
+      opts =
+        ClientSignalsPlug.init(
+          service: "ui-ex",
+          tracked_route_prefixes: ["/api/v1"],
+          route_template_provider:
+            {__MODULE__, :route_template, ["/api/v1/organizations/:org_slug"]}
+        )
+
+      build_conn([{"fly-client-interactive", "true"}])
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      assert_receive {
+        [:client_signals, :request],
+        %{count: 1},
+        %{
+          service: "ui-ex",
+          route: "GET /api/v1/organizations/:org_slug",
+          operator: "interactive",
+          agent: "none"
+        }
+      }
+    end
+
+    test "does not observe routes outside the configured prefixes" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "ui-ex",
+          tracked_route_prefixes: ["/api/v1"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/dashboard/:organization_id"]}
+        )
+
+      build_conn([{"fly-client-interactive", "true"}])
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      refute_receive {:observed_request, _labels}
+    end
+
+    test "uses a bounded route for unmatched requests under a tracked prefix" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "ui-ex",
+          tracked_route_prefixes: ["/api/v1"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, [nil]}
+        )
+
+      Plug.Test.conn(:delete, "/api/v1/not-a-route/123")
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(404, "not found")
+
+      assert_receive {:observed_request,
+                      %{
+                        service: "ui-ex",
+                        route: "DELETE unmatched",
+                        operator: "uninstrumented",
+                        agent: "none"
+                      }}
+    end
+
+    test "requires the complete request observation configuration" do
+      assert_raise ArgumentError, fn ->
+        ClientSignalsPlug.init(service: "ui-ex", tracked_route_prefixes: ["/api/v1"])
+      end
+    end
+  end
+
+  def observe_request(labels, test_pid), do: send(test_pid, {:observed_request, labels})
+  def route_template(_conn, route_template), do: route_template
+
+  def handle_event(event, measurements, metadata, test_pid) do
+    send(test_pid, {event, measurements, metadata})
   end
 end

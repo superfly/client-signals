@@ -62,6 +62,44 @@ plug ClientSignals.Plug
 This module is only defined when both dependencies are present, so it
 has no effect on consumers that only use the header-generation API above.
 
+The Plug emits the canonical `[:client_signals, :request]` telemetry event for
+requests whose matched route template falls under configured prefixes:
+
+```elixir
+plug ClientSignals.Plug,
+  service: "my-api",
+  tracked_route_prefixes: ["/api/v1"],
+  route_template_provider: {MyApp.ClientSignals, :route_template, []}
+```
+
+Add `ClientSignals.PromExPlugin` to the application's PromEx plugins to export
+`fly_client_signals_requests_total`:
+
+```elixir
+def plugins do
+  [
+    ClientSignals.PromExPlugin
+  ]
+end
+```
+
+The telemetry event contains the bounded metadata keys `service`,
+`route`, `operator`, and `agent`. `route` combines the uppercase HTTP
+method with the matched route template. Unmatched requests under a configured
+prefix use `"METHOD unmatched"`; raw request paths are never forwarded.
+
+The `operator` values are `ci`, `agent`, `interactive`,
+`automated_unattributed`, and `uninstrumented`. The `agent` value is a known
+finite agent name, `other`, or `none`. Parent is deliberately not used for
+classification.
+
+The package owns the canonical telemetry event and PromEx metric definition.
+The route-template provider, service name, tracked route prefixes, PromEx
+supervision, and collector registration remain owned by each consuming
+service. A custom `request_observer` MFA remains supported. For Phoenix, the
+route-template provider can use `Phoenix.Router.route_info/4` with the
+application's router.
+
 ## Development
 
 ```sh
