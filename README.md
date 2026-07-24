@@ -28,6 +28,13 @@ detect signals once, build/apply `{prefix}-Client-*` headers, and build the
 client-signals User-Agent suffix. See each package README for language
 specific installation, API names, and examples.
 
+The Go and Elixir packages also expose server-side helpers that classify
+incoming headers into bounded metric-label values. The Elixir Plug can invoke
+a caller-provided observer for selected API route prefixes after routing. The
+package deliberately does not register or publish metrics itself: metric
+libraries, service names, and tracked route prefixes belong to each consuming
+service.
+
 ## Shared contract
 
 All implementations must preserve these invariants:

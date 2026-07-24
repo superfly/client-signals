@@ -51,6 +51,25 @@ sig.ApplyHeadersWithPrefix(header, "Acme")
   the User-Agent suffix.
 - `Signals.WrapTransportWithPrefix(http.RoundTripper, string)` wraps with a
   custom header prefix.
+- `ClassifyRequestHeaders(http.Header)` returns bounded `operator` and `agent`
+  values for server-side metrics. `Fly-Client-Interactive` is the
+  instrumentation sentinel; Parent is not used.
+- `TrackedAPIRoute(method, routeTemplate, requestPath, prefixes)` selects
+  configured API prefixes and returns a bounded `"METHOD /route/{template}"`
+  label. Raw paths are never returned for unmatched requests.
+
+## Server-side request metrics
+
+`ClassifyRequestHeaders` uses the following operator precedence:
+`ci > agent > interactive > automated_unattributed`. A missing or invalid
+`Fly-Client-Interactive` header produces `uninstrumented`.
+
+Known agents retain their finite marker-table name. Valid sanitized
+self-declarations not in that table become `other`; missing or invalid agent
+values become `none`. This makes both fields suitable for metric labels without
+allowing caller-controlled cardinality.
+
+Metric registration remains the consuming service's responsibility.
 
 The Go module lives under `go/`; consumers of the old root module path must
 update imports to `github.com/superfly/client-signals/go`.

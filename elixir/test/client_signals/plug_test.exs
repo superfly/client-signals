@@ -95,5 +95,80 @@ defmodule ClientSignals.PlugTest do
 
       assert ClientSignalsPlug.call(conn, ClientSignalsPlug.init([])) == conn
     end
+
+    test "observes configured API routes after routing" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "sprites-api",
+          tracked_route_prefixes: ["/v1", "/api/v1"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/v1/sprites/:name"]}
+        )
+
+      conn =
+        build_conn([
+          {"fly-client-interactive", "false"},
+          {"fly-client-agent", "codex"}
+        ])
+        |> ClientSignalsPlug.call(opts)
+        |> Plug.Conn.send_resp(200, "ok")
+
+      assert conn.state == :sent
+
+      assert_receive {:observed_request,
+                      %{
+                        service: "sprites-api",
+                        api_route: "GET /v1/sprites/:name",
+                        operator: "agent",
+                        agent: "codex"
+                      }}
+    end
+
+    test "does not observe routes outside the configured prefixes" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "ui-ex",
+          tracked_route_prefixes: ["/api/v1"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/dashboard/:organization_id"]}
+        )
+
+      build_conn([{"fly-client-interactive", "true"}])
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      refute_receive {:observed_request, _labels}
+    end
+
+    test "uses a bounded route for unmatched requests under a tracked prefix" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "ui-ex",
+          tracked_route_prefixes: ["/api/v1"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, [nil]}
+        )
+
+      Plug.Test.conn(:delete, "/api/v1/not-a-route/123")
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(404, "not found")
+
+      assert_receive {:observed_request,
+                      %{
+                        service: "ui-ex",
+                        api_route: "DELETE unmatched",
+                        operator: "uninstrumented",
+                        agent: "none"
+                      }}
+    end
+
+    test "requires the complete request observation configuration" do
+      assert_raise ArgumentError, fn ->
+        ClientSignalsPlug.init(service: "ui-ex", tracked_route_prefixes: ["/api/v1"])
+      end
+    end
   end
+
+  def observe_request(labels, test_pid), do: send(test_pid, {:observed_request, labels})
+  def route_template(_conn, route_template), do: route_template
 end

@@ -30,17 +30,42 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
     @max_value_length 256
 
     @impl true
-    def init(opts), do: opts
+    def init(opts) do
+      service = Keyword.get(opts, :service)
+      tracked_route_prefixes = Keyword.get(opts, :tracked_route_prefixes, [])
+      request_observer = Keyword.get(opts, :request_observer)
+      route_template_provider = Keyword.get(opts, :route_template_provider)
+
+      metrics_configured? =
+        not is_nil(service) or tracked_route_prefixes != [] or not is_nil(request_observer) or
+          not is_nil(route_template_provider)
+
+      if metrics_configured? and
+           (not is_binary(service) or service == "" or tracked_route_prefixes == [] or
+              is_nil(request_observer) or is_nil(route_template_provider)) do
+        raise ArgumentError,
+              "service, tracked_route_prefixes, request_observer, and " <>
+                "route_template_provider are all required " <>
+                "when client-signal request observation is enabled"
+      end
+
+      %{
+        service: service,
+        tracked_route_prefixes: tracked_route_prefixes,
+        request_observer: request_observer,
+        route_template_provider: route_template_provider
+      }
+    end
 
     @impl true
-    def call(conn, _opts) do
+    def call(conn, opts) do
       attrs = client_signal_attributes(conn)
 
       if attrs != [] do
         Tracer.set_attributes(attrs)
       end
 
-      conn
+      maybe_register_request_observer(conn, opts)
     end
 
     @doc false
@@ -85,6 +110,57 @@ if Code.ensure_loaded?(Plug.Conn) and Code.ensure_loaded?(OpenTelemetry.Tracer) 
         v when v in ~w(0 f false) -> {:ok, false}
         _ -> :error
       end
+    end
+
+    defp maybe_register_request_observer(conn, %{request_observer: nil}), do: conn
+
+    defp maybe_register_request_observer(conn, opts) do
+      register_before_send(conn, fn conn ->
+        route_template = route_template(opts.route_template_provider, conn)
+
+        case ClientSignals.Request.tracked_api_route(
+               conn.method,
+               route_template,
+               conn.request_path,
+               opts.tracked_route_prefixes
+             ) do
+          {api_route, true} ->
+            classification =
+              ClientSignals.Request.classify(
+                first_req_header(conn, @interactive_header),
+                first_req_header(conn, @agent_header),
+                first_req_header(conn, @ci_header)
+              )
+
+            labels =
+              classification
+              |> Map.put(:service, opts.service)
+              |> Map.put(:api_route, api_route)
+
+            notify_request_observer(opts.request_observer, labels)
+            conn
+
+          {"", false} ->
+            conn
+        end
+      end)
+    end
+
+    defp first_req_header(conn, header) do
+      case get_req_header(conn, header) do
+        [value | _] -> value
+        _ -> nil
+      end
+    end
+
+    defp notify_request_observer({module, function, args}, labels)
+         when is_atom(module) and is_atom(function) and is_list(args) do
+      apply(module, function, [labels | args])
+    end
+
+    defp route_template({module, function, args}, conn)
+         when is_atom(module) and is_atom(function) and is_list(args) do
+      apply(module, function, [conn | args])
     end
   end
 end
