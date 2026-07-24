@@ -27,6 +27,8 @@ linters:
       allowed:
         domains:
           - golang.org
+        modules:
+          - github.com/prometheus/client_golang
   exclusions:
     generated: lax
     presets:
