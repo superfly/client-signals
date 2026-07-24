@@ -22,9 +22,9 @@ fly_client_signals_requests_total{
 }
 ```
 
-The library does not register this counter. Metric registration, the bounded
-`service` value, the route-template provider, and the tracked route prefixes
-belong to each consuming service.
+Implementations may provide a collector for this counter. Metric registration,
+the bounded `service` value, the route-template provider, and the tracked route
+prefixes belong to each consuming service.
 
 `parent` and `agent_source` are deliberately not metric labels. Parent-process
 lookup is not reliable enough for request classification, and agent source is

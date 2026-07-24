@@ -57,6 +57,10 @@ sig.ApplyHeadersWithPrefix(header, "Acme")
 - `TrackedRoute(method, routeTemplate, requestPath, prefixes)` selects
   configured route prefixes and returns a bounded `"METHOD /route/{template}"`
   label. Raw paths are never returned for unmatched requests.
+- `NewRequestCounter(service, trackedRoutePrefixes)` constructs the canonical
+  `fly_client_signals_requests_total` Prometheus collector. Register it with
+  the service's Prometheus registry and call `Observe(request, routeTemplate)`
+  after routing.
 
 ## Server-side request metrics
 
@@ -69,7 +73,10 @@ self-declarations not in that table become `other`; missing or invalid agent
 values become `none`. This makes both fields suitable for metric labels without
 allowing caller-controlled cardinality.
 
-Metric registration remains the consuming service's responsibility.
+The request counter owns the canonical metric name, help text, label order,
+route filtering, and request classification. The consuming service remains
+responsible for registering the collector and providing its bounded service
+name, tracked route prefixes, and router-owned route template.
 
 The Go module lives under `go/`; consumers of the old root module path must
 update imports to `github.com/superfly/client-signals/go`.
