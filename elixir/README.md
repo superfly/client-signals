@@ -10,7 +10,7 @@ published:
 ```elixir
 def deps do
   [
-    {:client_signals, "~> 0.0.0"}
+    {:client_signals, "~> 0.4"}
   ]
 end
 ```

@@ -76,8 +76,23 @@ See [docs/signals.md](docs/signals.md) for signal rationale and
 
 ## Releases
 
-Pushing a `vX.Y.Z` tag creates a GitHub release and publishes the Python
-package to PyPI (`.github/workflows/publish-python.yml`, via PyPI trusted
-publishing — no API tokens). The workflow stamps the tag's version into
-`python/pyproject.toml` at build time. npm and Hex publishing are not
-automated yet.
+Pushing a final `vX.Y.Z` tag creates a GitHub release and publishes the same
+version to PyPI, npm, and Hex. Each package manifest keeps a `0.0.0`
+placeholder in the repository; its publishing workflow stamps the version
+from the tag before testing, building, and publishing.
+
+- PyPI uses trusted publishing via GitHub OIDC.
+- npm uses the `NPM_TOKEN` Actions secret. It must be a granular token with
+  write access to `@superfly/client-signals` and permission to bypass 2FA.
+- Hex uses the `HEX_API_KEY` Actions secret. Generate a dedicated CI key with
+  `mix hex.user key generate --key-name github-actions-publish --permission api:write`.
+
+Only final release tags are published. Prerelease tags such as
+`v0.5.0-pre-1` still create GitHub prereleases but are intentionally excluded
+from all three package registries.
+
+After the npm package has an initial release, it can be migrated from the
+long-lived token to npm trusted publishing. Configure GitHub Actions as the
+trusted publisher for organization `superfly`, repository `client-signals`,
+and workflow `publish-javascript.yml`, then remove `NODE_AUTH_TOKEN` and the
+`NPM_TOKEN` secret.
