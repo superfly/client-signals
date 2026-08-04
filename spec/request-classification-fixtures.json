@@ -43,6 +43,14 @@
     "want": {"operator": "agent", "agent": "claude-code"}
   },
   {
+    "name": "grok plugin manifest headers",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "grok"
+    },
+    "want": {"operator": "agent", "agent": "grok"}
+  },
+  {
     "name": "unknown sanitized declaration is bounded",
     "headers": {
       "Fly-Client-Interactive": "false",
