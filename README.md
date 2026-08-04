@@ -82,8 +82,10 @@ placeholder in the repository; its publishing workflow stamps the version
 from the tag before testing, building, and publishing.
 
 - PyPI uses trusted publishing via GitHub OIDC.
-- npm uses the `NPM_TOKEN` Actions secret. It must be a granular token with
-  write access to `@superfly/client-signals` and permission to bypass 2FA.
+- npm uses trusted publishing via GitHub OIDC. Configure `@fly/client-signals`
+  with organization `superfly`, repository `client-signals`, workflow
+  `publish-javascript.yml`, and permission to run `npm publish`. No npm token
+  or Actions secret is used.
 - Hex uses the `HEX_API_KEY` Actions secret. Generate a dedicated CI key with
   `mix hex.user key generate --key-name github-actions-publish --permission api:write`.
 
@@ -91,8 +93,6 @@ Only final release tags are published. Prerelease tags such as
 `v0.5.0-pre-1` still create GitHub prereleases but are intentionally excluded
 from all three package registries.
 
-After the npm package has an initial release, it can be migrated from the
-long-lived token to npm trusted publishing. Configure GitHub Actions as the
-trusted publisher for organization `superfly`, repository `client-signals`,
-and workflow `publish-javascript.yml`, then remove `NODE_AUTH_TOKEN` and the
-`NPM_TOKEN` secret.
+npm requires a package to exist before its trusted publisher can be
+configured. An `@fly` npm maintainer must bootstrap `@fly/client-signals`
+once, then configure the trusted publisher above before the next release tag.

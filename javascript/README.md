@@ -5,7 +5,7 @@ JavaScript implementation of the shared `client-signals` contract.
 ## Installation
 
 ```sh
-npm install @superfly/client-signals
+npm install @fly/client-signals
 ```
 
 Requires Node.js 20 or newer.
@@ -13,7 +13,7 @@ Requires Node.js 20 or newer.
 ## Usage
 
 ```js
-import { applyHeaders, detectOnce, userAgentSuffix } from "@superfly/client-signals";
+import { applyHeaders, detectOnce, userAgentSuffix } from "@fly/client-signals";
 
 const signals = detectOnce();
 const headers = {};
