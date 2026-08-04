@@ -4,7 +4,7 @@ JavaScript-specific notes for agents working in `javascript/`.
 
 ## Package
 
-This directory is the npm package `@superfly/client-signals`.
+This directory is the npm package `@fly/client-signals`.
 
 Runtime target: Node.js 20 or newer.
 

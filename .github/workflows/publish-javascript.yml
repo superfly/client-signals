@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   publish:
-    name: Test and publish @superfly/client-signals to npm
+    name: Test and publish @fly/client-signals to npm
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,7 +32,7 @@ jobs:
         run: |
           # Strip the leading v; package.json ships a 0.0.0 placeholder.
           VERSION="${GITHUB_REF_NAME#v}"
-          echo "Publishing @superfly/client-signals ${VERSION}"
+          echo "Publishing @fly/client-signals ${VERSION}"
           npm version "${VERSION}" --no-git-tag-version --allow-same-version
 
       - name: Run tests
@@ -43,5 +43,3 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
