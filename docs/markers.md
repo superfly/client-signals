@@ -59,6 +59,28 @@ expected and needs reconsidering.
 | OpenCode | `OPENCODE`, `OPENCODE_CALLER`, `OPENCODE_CLIENT` | presence | Med | |
 | GitHub Copilot | `COPILOT_MODEL`, `COPILOT_ALLOW_ALL` | presence | Med | |
 | Kilo Code | `KILO_PLATFORM=vscode` | exact | Low | Set by an editor extension, not confirmed to reach the shell the CLI actually runs in. |
+| Grok Build | `GROK_AGENT=1` | exact | High | Set by Grok Build on the subprocesses its tools spawn — verified empirically against Grok Build 0.2.103, which exports `GROK_AGENT=1` to its bash tool from an otherwise clean environment. Matched on the exact value because the same name is *also* a documented user-facing setting (see below). |
+
+**`GROK_AGENT` is dual-use, and the exact-value match is load-bearing.**
+Grok Build documents `GROK_AGENT` as a user setting holding "custom agent
+definition path or name" — the env form of its `--agent` flag. That form is
+precisely the config-style variable this table is supposed to exclude: a human
+can set `GROK_AGENT=my-reviewer` in a shell profile and forget it. The tool-set
+marker is the literal string `1`, which is never a meaningful agent name or
+path, so `exactValue: ["1"]` separates the two uses. Do not relax this entry to
+`presence` — that would misclassify every session of any human who has
+configured a custom Grok agent.
+
+**Grok Build also sets `CI=true` on tool subprocesses.** It ships a bundle of
+"make subprocesses non-interactive" variables (`CI=true`, `NO_COLOR=1`,
+`PAGER=cat`, `GIT_TERMINAL_PROMPT=0`, …). Since operator precedence is
+`ci > agent`, a CLI invoked from Grok's bash tool classifies as
+`operator="ci"`, not `operator="agent"` — the `agent="grok"` label is still
+preserved (see [request-metrics.md](../spec/request-metrics.md)), but the
+"subtract CI before attributing the remainder to agents" approach in
+[signals.md](signals.md) will subtract this traffic away. Treat `operator="ci"
++ agent="grok"` as agent traffic when reporting, not as CI. Other harnesses
+may do the same; this is the first one confirmed to.
 
 **Containerized/wrapped agents need no special rows.** E.g. an agent that
 runs Claude Code inside a container already shows up as `CLAUDECODE=1`

@@ -83,6 +83,23 @@ func TestDetectAgent_ExactValueRequiresExactMatch(t *testing.T) {
 	}
 }
 
+// GROK_AGENT is dual-use: Grok Build sets it to "1" on the subprocesses its
+// tools spawn, but a human can also set it to a custom agent name or definition
+// path. Only the tool-set form should count as a marker.
+func TestDetectAgent_GrokAgentIgnoresUserConfiguredValue(t *testing.T) {
+	for _, value := range []string{"my-reviewer", "/Users/me/agents/reviewer.md", "0"} {
+		t.Run(value, func(t *testing.T) {
+			clearAgentEnv(t)
+			t.Setenv("GROK_AGENT", value)
+
+			agent, source := detectAgent()
+			if agent != "" || source != "" {
+				t.Fatalf("expected user-configured GROK_AGENT=%q to be ignored, got agent=%q source=%q", value, agent, source)
+			}
+		})
+	}
+}
+
 func TestDetectAgent_CrossToolAgentConvention(t *testing.T) {
 	clearAgentEnv(t)
 	t.Setenv("AGENT", "goose")

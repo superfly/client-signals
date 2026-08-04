@@ -94,6 +94,16 @@ it exists so that CI traffic can be subtracted out *before* attributing
 the remaining "automated" traffic to agents, since CI runs are automated
 but not agent-driven.
 
+**Caveat**: some agent harnesses set `CI=true` on the subprocesses they
+spawn, as part of a general "make subprocesses non-interactive" bundle
+alongside `NO_COLOR`, `PAGER=cat`, and similar. Grok Build is the first
+confirmed case (see [markers.md](markers.md)). For those, `CI=true` does
+*not* mean "this was a CI run" — subtracting it wholesale undercounts
+exactly the agent traffic this package exists to estimate. When a request
+carries both `CI=true` and a recognized agent marker, prefer the agent
+attribution; the request-metrics contract deliberately preserves the
+`agent` label on `operator="ci"` requests so this remains possible.
+
 ## How the fields are meant to combine (server-side, informative here)
 
 The actual bucketing/weighting happens on the backend, not in this
