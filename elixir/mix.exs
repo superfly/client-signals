@@ -9,7 +9,10 @@ defmodule ClientSignals.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: "Privacy-safe client signals for CLI HTTP traffic.",
-      package: package()
+      package: package(),
+      source_url: "https://github.com/superfly/client-signals",
+      homepage_url: "https://github.com/superfly/client-signals",
+      docs: [main: "readme", extras: ["README.md"]]
     ]
   end
 
@@ -26,13 +29,15 @@ defmodule ClientSignals.MixProject do
       {:plug, "~> 1.14", optional: true},
       {:opentelemetry_api, "~> 1.4", optional: true},
       {:telemetry, "~> 1.0", optional: true},
-      {:prom_ex, "~> 1.11", optional: true}
+      {:prom_ex, "~> 1.11", optional: true},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
   defp package do
     [
-      licenses: ["MIT"],
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE),
+      licenses: ["Apache-2.0"],
       links: %{"GitHub" => "https://github.com/superfly/client-signals"}
     ]
   end

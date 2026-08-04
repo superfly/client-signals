@@ -1,0 +1,47 @@
+name: Publish JavaScript to npm
+
+on:
+  push:
+    tags:
+      # Final releases only. Keep this aligned with publish-python.yml and
+      # publish-hex.yml.
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+  id-token: write # npm provenance attestation
+
+jobs:
+  publish:
+    name: Test and publish @superfly/client-signals to npm
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: javascript
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Stamp version from tag
+        run: |
+          # Strip the leading v; package.json ships a 0.0.0 placeholder.
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Publishing @superfly/client-signals ${VERSION}"
+          npm version "${VERSION}" --no-git-tag-version --allow-same-version
+
+      - name: Run tests
+        run: npm test
+
+      - name: Verify package contents
+        run: npm pack --dry-run
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,52 @@
+name: Publish Elixir to Hex
+
+on:
+  push:
+    tags:
+      # Final releases only. Keep this aligned with publish-python.yml and
+      # publish-javascript.yml.
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Test and publish client_signals to Hex
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: elixir
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Set up Erlang and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.15'
+          otp-version: '26'
+
+      - name: Stamp version from tag
+        run: |
+          # Strip the leading v; mix.exs ships a 0.0.0 placeholder.
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Publishing client_signals ${VERSION}"
+          sed -i "s/version: \".*\"/version: \"${VERSION}\"/" mix.exs
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run tests and formatting checks
+        run: |
+          mix test
+          mix format --check-formatted
+
+      - name: Build documentation and package
+        run: |
+          mix docs
+          mix hex.build
+
+      - name: Publish package and documentation to Hex
+        run: mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
