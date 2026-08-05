@@ -82,8 +82,9 @@ version to PyPI and Hex. The Python and Elixir package manifests keep a
 version from the tag before testing, building, and publishing.
 
 - PyPI uses trusted publishing via GitHub OIDC.
-- Hex uses the `HEX_API_KEY` Actions secret. Generate a dedicated CI key with
-  `mix hex.user key generate --key-name github-actions-publish --permission api:write`.
+- Hex uses the `HEX_API_KEY` Actions secret from the `hex` GitHub environment.
+  Generate a dedicated CI key with `mix hex.user key generate --key-name
+  github-actions-publish --permission api:write`.
 
 Only final release tags are published. Prerelease tags such as
 `v0.5.0-pre-1` still create GitHub prereleases but are intentionally excluded
