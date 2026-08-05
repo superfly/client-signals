@@ -3,8 +3,7 @@ name: Publish Elixir to Hex
 on:
   push:
     tags:
-      # Final releases only. Keep this aligned with publish-python.yml and
-      # publish-javascript.yml.
+      # Final releases only. Keep this aligned with publish-python.yml.
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 permissions:

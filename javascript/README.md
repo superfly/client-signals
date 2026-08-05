@@ -2,11 +2,12 @@
 
 JavaScript implementation of the shared `client-signals` contract.
 
-## Installation
+## Distribution
 
-```sh
-npm install @fly/client-signals
-```
+This package is not published to npm. Downstream packages consume it by
+vendoring this directory and referencing the vendored copy as a local
+dependency. The package manifest is marked private to prevent accidental
+publication.
 
 Requires Node.js 20 or newer.
 
