@@ -4,7 +4,9 @@ JavaScript-specific notes for agents working in `javascript/`.
 
 ## Package
 
-This directory is the npm package `@fly/client-signals`.
+This directory contains the private JavaScript package
+`@fly/client-signals`. It is not published to npm; downstream packages vendor
+it as a local dependency.
 
 Runtime target: Node.js 20 or newer.
 

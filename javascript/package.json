@@ -1,6 +1,7 @@
 {
   "name": "@fly/client-signals",
   "version": "0.0.0",
+  "private": true,
   "description": "Privacy-safe client signals for CLI HTTP traffic.",
   "type": "module",
   "main": "./src/index.js",
@@ -27,9 +28,5 @@
     "type": "git",
     "url": "git+https://github.com/superfly/client-signals.git",
     "directory": "javascript"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
   }
 }

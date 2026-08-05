@@ -77,22 +77,18 @@ See [docs/signals.md](docs/signals.md) for signal rationale and
 ## Releases
 
 Pushing a final `vX.Y.Z` tag creates a GitHub release and publishes the same
-version to PyPI, npm, and Hex. Each package manifest keeps a `0.0.0`
-placeholder in the repository; its publishing workflow stamps the version
-from the tag before testing, building, and publishing.
+version to PyPI and Hex. The Python and Elixir package manifests keep a
+`0.0.0` placeholder in the repository; their publishing workflows stamp the
+version from the tag before testing, building, and publishing.
 
 - PyPI uses trusted publishing via GitHub OIDC.
-- npm uses trusted publishing via GitHub OIDC. Configure `@fly/client-signals`
-  with organization `superfly`, repository `client-signals`, workflow
-  `publish-javascript.yml`, and permission to run `npm publish`. No npm token
-  or Actions secret is used.
 - Hex uses the `HEX_API_KEY` Actions secret. Generate a dedicated CI key with
   `mix hex.user key generate --key-name github-actions-publish --permission api:write`.
 
 Only final release tags are published. Prerelease tags such as
 `v0.5.0-pre-1` still create GitHub prereleases but are intentionally excluded
-from all three package registries.
+from both package registries.
 
-npm requires a package to exist before its trusted publisher can be
-configured. An `@fly` npm maintainer must bootstrap `@fly/client-signals`
-once, then configure the trusted publisher above before the next release tag.
+The JavaScript implementation is not published to npm. It remains tested in
+CI and versioned with the repository so downstream packages can vendor it.
+Its package manifest is marked private to prevent accidental publication.
