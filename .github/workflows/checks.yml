@@ -75,6 +75,18 @@ jobs:
         working-directory: python
         run: python -m unittest
 
+  ruby-test:
+    name: ruby test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+      - name: Run tests
+        working-directory: ruby
+        run: rake test
+
   elixir-test:
     name: elixir test
     runs-on: ubuntu-latest

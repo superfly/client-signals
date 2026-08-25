@@ -20,6 +20,7 @@ blocking, rate-limiting, or auth decisions.
 - `go/` — Go implementation and package README.
 - `javascript/` — JavaScript implementation and package README.
 - `python/` — Python implementation and package README.
+- `ruby/`: Ruby implementation and package README.
 - `elixir/` — Elixir implementation and package README.
 - `docs/` — shared signal rationale and marker-review guidance.
 
