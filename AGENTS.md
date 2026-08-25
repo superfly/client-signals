@@ -24,6 +24,7 @@ detection logic — not just the "what" — read:
 - `go/` — Go package and language-specific agent instructions.
 - `javascript/` — JavaScript package and language-specific agent instructions.
 - `python/` — Python package and language-specific agent instructions.
+- `ruby/`: Ruby package and language-specific agent instructions.
 - `elixir/` — Elixir package and language-specific agent instructions.
 
 When working inside a language package, also read that package's
@@ -55,11 +56,12 @@ Run all package tests:
 (cd go && go test ./...)
 (cd javascript && npm test)
 (cd python && python3 -m unittest)
+(cd ruby && rake test)
 (cd elixir && mix test)
 ```
 
 CI (`.github/workflows/checks.yml`) runs Go tests on Linux, macOS, and
-Windows, plus JavaScript, Python, Elixir, and Go lint jobs.
+Windows, plus JavaScript, Python, Ruby, Elixir, and Go lint jobs.
 
 To cut a release: `scripts/bump_version.sh` (or `scripts/bump_version.sh
 prerel` for a prerelease) from `main`, tagging and pushing a real GitHub
