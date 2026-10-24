@@ -1,0 +1,1167 @@
+[
+  {
+    "name": "no headers and no clientInfo",
+    "headers": {},
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "claude.ai chat relay",
+    "headers": {
+      "User-Agent": "Claude-User",
+      "X-Anthropic-Client": "ClaudeAI"
+    },
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "claude-ai", "source": "vendor_header", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "claude.ai artifacts relay",
+    "headers": {
+      "User-Agent": "Claude-User",
+      "X-Anthropic-Client": "ClaudeArtifacts"
+    },
+    "want": {"client": "claude-ai", "source": "vendor_header", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "cowork relay",
+    "headers": {
+      "User-Agent": "Claude-User",
+      "X-Anthropic-Client": "Cowork"
+    },
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "claude-ai", "source": "vendor_header", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "claude code via claude.ai relay beats pooled clientInfo and relay UA",
+    "headers": {
+      "User-Agent": "Claude-User",
+      "X-Anthropic-Client": "ClaudeCode"
+    },
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "claude-code", "source": "vendor_header", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "vendor header hyphenated spelling",
+    "headers": {
+      "X-Anthropic-Client": "claude-code"
+    },
+    "want": {"client": "claude-code", "source": "vendor_header", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "vendor header underscore spelling",
+    "headers": {
+      "X-Anthropic-Client": "claude_code"
+    },
+    "want": {"client": "claude-code", "source": "vendor_header", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "vendor header spaced uppercase spelling",
+    "headers": {
+      "X-Anthropic-Client": "  CLAUDE CODE  "
+    },
+    "want": {"client": "claude-code", "source": "vendor_header", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "vendor header hyphenated claude-ai spelling",
+    "headers": {
+      "X-Anthropic-Client": "claude-ai"
+    },
+    "want": {"client": "claude-ai", "source": "vendor_header", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "vendor header beats a different known user agent",
+    "headers": {
+      "User-Agent": "Cursor/1.0.0",
+      "X-Anthropic-Client": "ClaudeCode"
+    },
+    "want": {"client": "claude-code", "source": "vendor_header", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "unknown vendor header alone is not a client",
+    "headers": {
+      "X-Anthropic-Client": "ClaudeDesign"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "unknown vendor header falls through to user agent",
+    "headers": {
+      "User-Agent": "Claude-User",
+      "X-Anthropic-Client": "ClaudeDesign"
+    },
+    "want": {"client": "claude-ai", "source": "user_agent", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "unknown vendor header falls through to clientInfo",
+    "headers": {
+      "X-Anthropic-Client": "claude-cli-design-sync"
+    },
+    "clientName": "claude-ai",
+    "want": {"client": "claude-ai", "source": "client_info", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "empty vendor header is absent",
+    "headers": {
+      "X-Anthropic-Client": "   "
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "vendor header is matched exactly, not by prefix",
+    "headers": {
+      "X-Anthropic-Client": "ClaudeCodeX"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "claude code cli user agent",
+    "headers": {
+      "User-Agent": "claude-code/2.1.309 (cli)"
+    },
+    "clientName": "claude-code",
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude code non-interactive user agent without clientInfo",
+    "headers": {
+      "User-Agent": "claude-code/2.1.309 (sdk-cli)"
+    },
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude agent sdk typescript user agent",
+    "headers": {
+      "User-Agent": "claude-code/2.1.309 (sdk-ts, agent-sdk/0.3.309)"
+    },
+    "clientName": "claude-code",
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude agent sdk python user agent",
+    "headers": {
+      "User-Agent": "claude-code/2.1.309 (sdk-py, agent-sdk/0.2.173)"
+    },
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude code vs code extension user agent",
+    "headers": {
+      "User-Agent": "claude-code/2.1.309 (claude-vscode, agent-sdk/0.3.309)"
+    },
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude code inside claude desktop user agent",
+    "headers": {
+      "User-Agent": "claude-code/2.1.304 (local-agent)"
+    },
+    "clientName": "claude-code",
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude code with user-overridden user agent falls through to clientInfo",
+    "headers": {
+      "User-Agent": "my-internal-proxy/2.0"
+    },
+    "clientName": "claude-code",
+    "want": {"client": "claude-code", "source": "client_info", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "claude.ai relay user agent alone",
+    "headers": {
+      "User-Agent": "Claude-User"
+    },
+    "want": {"client": "claude-ai", "source": "user_agent", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "claude.ai relay user agent beats weak pooled clientInfo",
+    "headers": {
+      "User-Agent": "Claude-User"
+    },
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "claude-ai", "source": "user_agent", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "pooled claude.ai clientInfo alone is weak but still identifies",
+    "headers": {},
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "claude-ai", "source": "client_info", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "bare anthropic clientInfo alone",
+    "headers": {},
+    "clientName": "Anthropic",
+    "want": {"client": "claude-ai", "source": "client_info", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "claude.ai probe with library user agent and pooled clientInfo",
+    "headers": {
+      "User-Agent": "python-httpx/0.28.1"
+    },
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "claude-ai", "source": "client_info", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "claude desktop local stdio clientInfo",
+    "headers": {},
+    "clientName": "claude-ai",
+    "want": {"client": "claude-ai", "source": "client_info", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "anthropic messages api connector clientInfo",
+    "headers": {},
+    "clientName": "Anthropic/API",
+    "want": {"client": "anthropic-api", "source": "client_info", "operator": "mcp", "agent": "anthropic-api"}
+  },
+  {
+    "name": "anthropic toolbox is deliberately unmatched",
+    "headers": {},
+    "clientName": "Anthropic/Toolbox",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "claude desktop cowork local agent mode is deliberately unmatched",
+    "headers": {},
+    "clientName": "local-agent-mode-github",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "claude-user is matched as a token not a prefix",
+    "headers": {
+      "User-Agent": "Claude-UserBot/1.0"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "codex mcp client user agent",
+    "headers": {
+      "User-Agent": "codex-mcp-client/0.164.0"
+    },
+    "clientName": "codex-mcp-client",
+    "want": {"client": "codex", "source": "user_agent", "operator": "mcp", "agent": "codex"}
+  },
+  {
+    "name": "codex prerelease user agent",
+    "headers": {
+      "User-Agent": "codex-mcp-client/0.163.0-alpha.11.1"
+    },
+    "want": {"client": "codex", "source": "user_agent", "operator": "mcp", "agent": "codex"}
+  },
+  {
+    "name": "older codex without user agent identified by clientInfo",
+    "headers": {},
+    "clientName": "codex-mcp-client",
+    "want": {"client": "codex", "source": "client_info", "operator": "mcp", "agent": "codex"}
+  },
+  {
+    "name": "chatgpt surface user agent",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (ChatGPT)"
+    },
+    "want": {"client": "chatgpt", "source": "user_agent", "operator": "mcp", "agent": "chatgpt"}
+  },
+  {
+    "name": "chatgpt surface refines weak openai-mcp clientInfo",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (ChatGPT)"
+    },
+    "clientName": "openai-mcp",
+    "want": {"client": "chatgpt", "source": "user_agent", "operator": "mcp", "agent": "chatgpt"}
+  },
+  {
+    "name": "hosted codex surface refines weak openai-mcp clientInfo",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (Codex)"
+    },
+    "clientName": "openai-mcp",
+    "want": {"client": "codex", "source": "user_agent", "operator": "mcp", "agent": "codex"}
+  },
+  {
+    "name": "responses api surface user agent",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (Responses API)"
+    },
+    "clientName": "openai-mcp (Responses API)",
+    "want": {"client": "openai-api", "source": "user_agent", "operator": "mcp", "agent": "openai-api"}
+  },
+  {
+    "name": "agent builder surface user agent",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (Agent Builder)"
+    },
+    "want": {"client": "openai-api", "source": "user_agent", "operator": "mcp", "agent": "openai-api"}
+  },
+  {
+    "name": "bare openai-mcp user agent is weak openai",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0"
+    },
+    "want": {"client": "openai", "source": "user_agent", "operator": "mcp", "agent": "openai"}
+  },
+  {
+    "name": "weak user agent beats weak clientInfo",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0"
+    },
+    "clientName": "openai-mcp",
+    "want": {"client": "openai", "source": "user_agent", "operator": "mcp", "agent": "openai"}
+  },
+  {
+    "name": "strong clientInfo beats weak user agent",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0"
+    },
+    "clientName": "openai-mcp (Responses API)",
+    "want": {"client": "openai-api", "source": "client_info", "operator": "mcp", "agent": "openai-api"}
+  },
+  {
+    "name": "bare openai-mcp clientInfo alone is weak openai",
+    "headers": {},
+    "clientName": "openai-mcp",
+    "want": {"client": "openai", "source": "client_info", "operator": "mcp", "agent": "openai"}
+  },
+  {
+    "name": "weak openai user agent beats weak claude.ai clientInfo",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0"
+    },
+    "clientName": "Anthropic/ClaudeAI",
+    "want": {"client": "openai", "source": "user_agent", "operator": "mcp", "agent": "openai"}
+  },
+  {
+    "name": "surface parenthetical requires the openai-mcp token",
+    "headers": {
+      "User-Agent": "my-client/1.0 (ChatGPT)"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "unknown openai-mcp surface stays weak openai",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (Atlas)"
+    },
+    "want": {"client": "openai", "source": "user_agent", "operator": "mcp", "agent": "openai"}
+  },
+  {
+    "name": "openai agents sdk python uses sdk defaults",
+    "headers": {
+      "User-Agent": "python-httpx/0.28.1"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "vs code user agent",
+    "headers": {
+      "User-Agent": "Visual Studio Code/1.141.1"
+    },
+    "clientName": "Visual Studio Code",
+    "want": {"client": "vscode", "source": "user_agent", "operator": "mcp", "agent": "vscode"}
+  },
+  {
+    "name": "vs code clientInfo over stdio",
+    "headers": {},
+    "clientName": "Visual Studio Code",
+    "want": {"client": "vscode", "source": "client_info", "operator": "mcp", "agent": "vscode"}
+  },
+  {
+    "name": "visual studio is not vs code",
+    "headers": {
+      "User-Agent": "Visual Studio/17.14"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "cursor editor user agent",
+    "headers": {
+      "User-Agent": "Cursor/3.20.21 (darwin arm64)"
+    },
+    "clientName": "cursor-vscode",
+    "want": {"client": "cursor", "source": "user_agent", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor agent cli user agent",
+    "headers": {
+      "User-Agent": "Cursor/1.0.0"
+    },
+    "clientName": "Cursor",
+    "want": {"client": "cursor", "source": "user_agent", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor editor clientInfo with overridden user agent",
+    "headers": {
+      "User-Agent": "custom-gateway/1.0"
+    },
+    "clientName": "cursor-vscode",
+    "want": {"client": "cursor", "source": "client_info", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor agent cli stateless meta fallback clientInfo",
+    "headers": {},
+    "clientName": "cursor",
+    "want": {"client": "cursor", "source": "client_info", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor bare product token user agent",
+    "headers": {
+      "User-Agent": "Cursor"
+    },
+    "want": {"client": "cursor", "source": "user_agent", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor token followed by semicolon",
+    "headers": {
+      "User-Agent": "Cursor; build 7"
+    },
+    "want": {"client": "cursor", "source": "user_agent", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor token followed by parenthesis",
+    "headers": {
+      "User-Agent": "cursor(darwin)"
+    },
+    "want": {"client": "cursor", "source": "user_agent", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "cursor token boundary negative",
+    "headers": {
+      "User-Agent": "cursorish/1.0"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "cursor plugin installer user agent is not mcp traffic",
+    "headers": {
+      "User-Agent": "CursorPluginInstaller"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "copilot cli user agent",
+    "headers": {
+      "User-Agent": "copilot/1.0.62 (darwin v24.11.0) term/iTerm.app"
+    },
+    "clientName": "github-copilot-developer",
+    "want": {"client": "copilot", "source": "user_agent", "operator": "mcp", "agent": "copilot"}
+  },
+  {
+    "name": "copilot cli sdk client user agent",
+    "headers": {
+      "User-Agent": "copilot/1.0.62 (client/my-app linux v24.11.0) term/unknown"
+    },
+    "want": {"client": "copilot", "source": "user_agent", "operator": "mcp", "agent": "copilot"}
+  },
+  {
+    "name": "copilot coding agent clientInfo",
+    "headers": {},
+    "clientName": "github-copilot-developer",
+    "want": {"client": "copilot", "source": "client_info", "operator": "mcp", "agent": "copilot"}
+  },
+  {
+    "name": "copilot language server user agent",
+    "headers": {
+      "User-Agent": "GithubCopilot/1.560.0"
+    },
+    "clientName": "JetBrains-IU/copilot-intellij",
+    "want": {"client": "copilot", "source": "user_agent", "operator": "mcp", "agent": "copilot"}
+  },
+  {
+    "name": "copilot jetbrains clientInfo template alone is unmatched",
+    "headers": {},
+    "clientName": "JetBrains-IU/copilot-intellij",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "copilot local ide bridge client is unmatched",
+    "headers": {},
+    "clientName": "copilot-cli",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "copilot token boundary negative",
+    "headers": {
+      "User-Agent": "copilotx/1.0"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "zed user agent",
+    "headers": {
+      "User-Agent": "Zed/1.27.0 (macos; aarch64)"
+    },
+    "clientName": "Zed",
+    "want": {"client": "zed", "source": "user_agent", "operator": "mcp", "agent": "zed"}
+  },
+  {
+    "name": "zed clientInfo over stdio",
+    "headers": {},
+    "clientName": "Zed",
+    "want": {"client": "zed", "source": "client_info", "operator": "mcp", "agent": "zed"}
+  },
+  {
+    "name": "zed token boundary negative user agent",
+    "headers": {
+      "User-Agent": "zedd/1.0"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "zed exact clientInfo boundary negative",
+    "headers": {},
+    "clientName": "zedd",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "jetbrains ai assistant clientInfo",
+    "headers": {
+      "User-Agent": "ktor-client"
+    },
+    "clientName": "jetbrains-ai-assistant-client",
+    "want": {"client": "jetbrains-ai", "source": "client_info", "operator": "mcp", "agent": "jetbrains-ai"}
+  },
+  {
+    "name": "jetbrains junie clientInfo",
+    "headers": {
+      "User-Agent": "ktor-client"
+    },
+    "clientName": "junie-client",
+    "want": {"client": "junie", "source": "client_info", "operator": "mcp", "agent": "junie"}
+  },
+  {
+    "name": "windsurf is deliberately unmatched",
+    "headers": {
+      "User-Agent": "Go-http-client/1.1"
+    },
+    "clientName": "windsurf-client",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "gemini cli clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "gemini-cli-mcp-client",
+    "want": {"client": "gemini-cli", "source": "client_info", "operator": "mcp", "agent": "gemini-cli"}
+  },
+  {
+    "name": "goose user agent",
+    "headers": {
+      "User-Agent": "goose/1.56.0"
+    },
+    "clientName": "goose-cli",
+    "want": {"client": "goose", "source": "user_agent", "operator": "mcp", "agent": "goose"}
+  },
+  {
+    "name": "goose desktop clientInfo",
+    "headers": {},
+    "clientName": "goose-desktop",
+    "want": {"client": "goose", "source": "client_info", "operator": "mcp", "agent": "goose"}
+  },
+  {
+    "name": "goose cli clientInfo",
+    "headers": {},
+    "clientName": "goose-cli",
+    "want": {"client": "goose", "source": "client_info", "operator": "mcp", "agent": "goose"}
+  },
+  {
+    "name": "goose under acp host clientInfo still labelled by user agent",
+    "headers": {
+      "User-Agent": "goose/1.56.0"
+    },
+    "clientName": "Zed",
+    "want": {"client": "goose", "source": "user_agent", "operator": "mcp", "agent": "goose"}
+  },
+  {
+    "name": "opencode clientInfo with bun user agent",
+    "headers": {
+      "User-Agent": "Bun/1.4.4"
+    },
+    "clientName": "opencode",
+    "want": {"client": "opencode", "source": "client_info", "operator": "mcp", "agent": "opencode"}
+  },
+  {
+    "name": "cline vs code extension clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "Cline",
+    "want": {"client": "cline", "source": "client_info", "operator": "mcp", "agent": "cline"}
+  },
+  {
+    "name": "cline sdk and cli clientInfo",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "@cline/core",
+    "want": {"client": "cline", "source": "client_info", "operator": "mcp", "agent": "cline"}
+  },
+  {
+    "name": "roo code clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "Roo Code",
+    "want": {"client": "roo-code", "source": "client_info", "operator": "mcp", "agent": "roo-code"}
+  },
+  {
+    "name": "kilo clientInfo",
+    "headers": {
+      "User-Agent": "Bun/1.4.4"
+    },
+    "clientName": "kilo",
+    "want": {"client": "kilo-code", "source": "client_info", "operator": "mcp", "agent": "kilo-code"}
+  },
+  {
+    "name": "legacy kilo code clientInfo",
+    "headers": {},
+    "clientName": "Kilo Code",
+    "want": {"client": "kilo-code", "source": "client_info", "operator": "mcp", "agent": "kilo-code"}
+  },
+  {
+    "name": "kilo debug command is deliberately unmatched",
+    "headers": {},
+    "clientName": "kilo-debug",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "continue ide clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "continue-client",
+    "want": {"client": "continue", "source": "client_info", "operator": "mcp", "agent": "continue"}
+  },
+  {
+    "name": "continue cli clientInfo",
+    "headers": {},
+    "clientName": "continue-cli-client",
+    "want": {"client": "continue", "source": "client_info", "operator": "mcp", "agent": "continue"}
+  },
+  {
+    "name": "kiro cli clientInfo",
+    "headers": {},
+    "clientName": "Q DEV CLI",
+    "want": {"client": "kiro", "source": "client_info", "operator": "mcp", "agent": "kiro"}
+  },
+  {
+    "name": "augment clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "augment-mcp-client",
+    "want": {"client": "augment", "source": "client_info", "operator": "mcp", "agent": "augment"}
+  },
+  {
+    "name": "amp clientInfo",
+    "headers": {
+      "User-Agent": "Bun/1.4.4"
+    },
+    "clientName": "amp-mcp-client",
+    "want": {"client": "amp", "source": "client_info", "operator": "mcp", "agent": "amp"}
+  },
+  {
+    "name": "warp stable clientInfo",
+    "headers": {},
+    "clientName": "dev.warp.Warp-Stable",
+    "want": {"client": "warp", "source": "client_info", "operator": "mcp", "agent": "warp"}
+  },
+  {
+    "name": "warp current clientInfo",
+    "headers": {},
+    "clientName": "dev.warp.Warp",
+    "want": {"client": "warp", "source": "client_info", "operator": "mcp", "agent": "warp"}
+  },
+  {
+    "name": "warp oss clientInfo",
+    "headers": {},
+    "clientName": "dev.warp.WarpOss",
+    "want": {"client": "warp", "source": "client_info", "operator": "mcp", "agent": "warp"}
+  },
+  {
+    "name": "legacy warp clientInfo",
+    "headers": {},
+    "clientName": "warp",
+    "want": {"client": "warp", "source": "client_info", "operator": "mcp", "agent": "warp"}
+  },
+  {
+    "name": "warp prefix requires the dot separator",
+    "headers": {},
+    "clientName": "dev.warpx",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "warp exact clientInfo boundary negative",
+    "headers": {},
+    "clientName": "warp-terminal",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "librechat clientInfo with undici user agent",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "@librechat/api-client",
+    "want": {"client": "librechat", "source": "client_info", "operator": "mcp", "agent": "librechat"}
+  },
+  {
+    "name": "grok build user agent",
+    "headers": {
+      "User-Agent": "grok-cli/0.2.103"
+    },
+    "clientName": "grok-shell-fly",
+    "want": {"client": "grok", "source": "user_agent", "operator": "mcp", "agent": "grok"}
+  },
+  {
+    "name": "grok build bare user agent",
+    "headers": {
+      "User-Agent": "grok-cli"
+    },
+    "want": {"client": "grok", "source": "user_agent", "operator": "mcp", "agent": "grok"}
+  },
+  {
+    "name": "grok build clientInfo with overridden user agent",
+    "headers": {
+      "User-Agent": "custom-gateway/1.0"
+    },
+    "clientName": "grok-shell-my-server",
+    "want": {"client": "grok", "source": "client_info", "operator": "mcp", "agent": "grok"}
+  },
+  {
+    "name": "grok shell prefix requires the trailing separator",
+    "headers": {},
+    "clientName": "grok-shell",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "pi clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "pi",
+    "want": {"client": "pi", "source": "client_info", "operator": "mcp", "agent": "pi"}
+  },
+  {
+    "name": "pi exact clientInfo boundary negative",
+    "headers": {},
+    "clientName": "pirate",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "pi example agent is not the product",
+    "headers": {},
+    "clientName": "pi-agent-example",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "openclaw bundle clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "openclaw-bundle-mcp",
+    "want": {"client": "openclaw", "source": "client_info", "operator": "mcp", "agent": "openclaw"}
+  },
+  {
+    "name": "openclaw browser clientInfo",
+    "headers": {},
+    "clientName": "openclaw-browser",
+    "want": {"client": "openclaw", "source": "client_info", "operator": "mcp", "agent": "openclaw"}
+  },
+  {
+    "name": "hermes agent clientInfo",
+    "headers": {
+      "User-Agent": "python-httpx/0.28.1"
+    },
+    "clientName": "hermes-agent",
+    "want": {"client": "hermes", "source": "client_info", "operator": "mcp", "agent": "hermes"}
+  },
+  {
+    "name": "hermes probe is deliberately unmatched",
+    "headers": {
+      "User-Agent": "python-httpx/0.28.1"
+    },
+    "clientName": "hermes-probe",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "mcp inspector web",
+    "headers": {},
+    "clientName": "mcp-inspector",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "mcp inspector cli",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "inspector-cli",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "mcp inspector v1 proxy",
+    "headers": {
+      "User-Agent": "node-fetch"
+    },
+    "clientName": "inspector-client",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "vercel ai sdk default",
+    "headers": {
+      "User-Agent": "ai-sdk/2.0.83 node.js/v22.11.0"
+    },
+    "clientName": "ai-sdk-mcp-client",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "official python sdk default with httpx2",
+    "headers": {
+      "User-Agent": "python-httpx2/2.16.0"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "official rust sdk default",
+    "headers": {},
+    "clientName": "rmcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "langchain js adapters default",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "@langchain/mcp-adapters",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "docker mcp gateway",
+    "headers": {
+      "User-Agent": "Go-http-client/1.1"
+    },
+    "clientName": "docker-mcp-gateway",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "smithery cli",
+    "headers": {},
+    "clientName": "@smithery/cli",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "standalone mcp-remote client",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "mcp-remote",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "fly mcp proxy client",
+    "headers": {},
+    "clientName": "FlyMCP Proxy Client",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "mcp-remote suffix stripped from claude desktop name",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "claude-ai (via mcp-remote 0.15.2)",
+    "want": {"client": "claude-ai", "source": "client_info", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "mcp-remote suffix stripped from jetbrains ai name",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "jetbrains-ai-assistant-client (via mcp-remote 0.1.18)",
+    "want": {"client": "jetbrains-ai", "source": "client_info", "operator": "mcp", "agent": "jetbrains-ai"}
+  },
+  {
+    "name": "mcp-remote suffix stripped from mixed-case name",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "Cursor (via mcp-remote 0.15.2)",
+    "want": {"client": "cursor", "source": "client_info", "operator": "mcp", "agent": "cursor"}
+  },
+  {
+    "name": "mcp-remote suffix on unknown name is other",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "my-desktop-app (via mcp-remote 0.15.2)",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "node fetch user agent alone",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "undici user agent alone",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "python httpx user agent alone",
+    "headers": {
+      "User-Agent": "python-httpx/0.28.1"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "go http client user agent alone",
+    "headers": {
+      "User-Agent": "Go-http-client/1.1"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "bun user agent alone",
+    "headers": {
+      "User-Agent": "Bun/1.4.4"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "curl user agent alone",
+    "headers": {
+      "User-Agent": "curl/8.7.1"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "scanner bot user agent alone",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (compatible; CompanyIntelligenceBot/0.2)"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "mcp registry bot user agent alone",
+    "headers": {
+      "User-Agent": "WebMCPIndexBot/0.1"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "browser user agent alone",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "node user agent with sdk default clientInfo",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "undici user agent with sdk default clientInfo",
+    "headers": {
+      "User-Agent": "undici"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "python httpx user agent with sdk default clientInfo",
+    "headers": {
+      "User-Agent": "python-httpx/0.28.1"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "go http client user agent with unknown clientInfo",
+    "headers": {
+      "User-Agent": "Go-http-client/1.1"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "bun user agent with sdk default clientInfo",
+    "headers": {
+      "User-Agent": "Bun/1.4.4"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "user agent matching is case-insensitive",
+    "headers": {
+      "User-Agent": "CLAUDE-CODE/2.1.309 (CLI)"
+    },
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "clientInfo matching is case-insensitive",
+    "headers": {},
+    "clientName": "GOOSE-CLI",
+    "want": {"client": "goose", "source": "client_info", "operator": "mcp", "agent": "goose"}
+  },
+  {
+    "name": "surrounding ascii whitespace is trimmed from the user agent",
+    "headers": {
+      "User-Agent": "  claude-code/2.1.309 (cli)  "
+    },
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "surrounding ascii whitespace is trimmed from clientInfo",
+    "headers": {},
+    "clientName": " \tpi\n ",
+    "want": {"client": "pi", "source": "client_info", "operator": "mcp", "agent": "pi"}
+  },
+  {
+    "name": "whitespace-only clientInfo is absent",
+    "headers": {},
+    "clientName": "   ",
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "empty clientInfo is absent",
+    "headers": {
+      "User-Agent": "node"
+    },
+    "clientName": "",
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "only ascii letters are lowercased",
+    "headers": {},
+    "clientName": "\u212ailo",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "over-long user agent is truncated before matching",
+    "headers": {
+      "User-Agent": "claude-code/2.1.309 (xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)"
+    },
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "mcp", "agent": "claude-code"}
+  },
+  {
+    "name": "contains beyond the first 256 bytes is not seen",
+    "headers": {
+      "User-Agent": "openai-mcp/1.0.0 (xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx) (ChatGPT)"
+    },
+    "want": {"client": "openai", "source": "user_agent", "operator": "mcp", "agent": "openai"}
+  },
+  {
+    "name": "over-long unknown clientInfo is other",
+    "headers": {},
+    "clientName": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "want": {"client": "other", "source": "client_info", "operator": "mcp", "agent": "other"}
+  },
+  {
+    "name": "over-long clientInfo still matches a prefix rule",
+    "headers": {},
+    "clientName": "grok-shell-ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    "want": {"client": "grok", "source": "client_info", "operator": "mcp", "agent": "grok"}
+  },
+  {
+    "name": "instrumented agent self-report wins over mcp identity",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "claude-code",
+      "User-Agent": "claude-code/2.1.309 (cli)"
+    },
+    "clientName": "claude-code",
+    "want": {"client": "claude-code", "source": "user_agent", "operator": "agent", "agent": "claude-code"}
+  },
+  {
+    "name": "instrumented interactive self-report wins over relay identity",
+    "headers": {
+      "Fly-Client-Interactive": "true",
+      "User-Agent": "Claude-User"
+    },
+    "want": {"client": "claude-ai", "source": "user_agent", "operator": "interactive", "agent": "none"}
+  },
+  {
+    "name": "instrumented automated self-report wins over mcp identity",
+    "headers": {
+      "Fly-Client-Interactive": "false"
+    },
+    "clientName": "cursor-vscode",
+    "want": {"client": "cursor", "source": "client_info", "operator": "automated_unattributed", "agent": "none"}
+  },
+  {
+    "name": "instrumented ci self-report wins and keeps declared agent",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "codex",
+      "Fly-Client-CI": "true",
+      "User-Agent": "codex-mcp-client/0.164.0"
+    },
+    "want": {"client": "codex", "source": "user_agent", "operator": "ci", "agent": "codex"}
+  },
+  {
+    "name": "instrumented declaration of an mcp label uses the union vocabulary",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "zed",
+      "User-Agent": "Zed/1.27.0 (macos; aarch64)"
+    },
+    "want": {"client": "zed", "source": "user_agent", "operator": "agent", "agent": "zed"}
+  },
+  {
+    "name": "instrumented unknown declaration stays other",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "my-agent"
+    },
+    "clientName": "goose-cli",
+    "want": {"client": "goose", "source": "client_info", "operator": "agent", "agent": "other"}
+  },
+  {
+    "name": "instrumented request without mcp identity",
+    "headers": {
+      "Fly-Client-Interactive": "1"
+    },
+    "want": {"client": "", "source": "none", "operator": "interactive", "agent": "none"}
+  },
+  {
+    "name": "instrumented request with unmatched clientInfo",
+    "headers": {
+      "Fly-Client-Interactive": "0"
+    },
+    "clientName": "mcp",
+    "want": {"client": "other", "source": "client_info", "operator": "automated_unattributed", "agent": "none"}
+  },
+  {
+    "name": "invalid sentinel falls back to mcp identity",
+    "headers": {
+      "Fly-Client-Interactive": "maybe",
+      "Fly-Client-Agent": "claude-code",
+      "User-Agent": "codex-mcp-client/0.164.0"
+    },
+    "want": {"client": "codex", "source": "user_agent", "operator": "mcp", "agent": "codex"}
+  },
+  {
+    "name": "missing sentinel ignores other fly headers and uses mcp identity",
+    "headers": {
+      "Fly-Client-Agent": "codex",
+      "Fly-Client-CI": "true",
+      "X-Anthropic-Client": "ClaudeAI",
+      "User-Agent": "Claude-User"
+    },
+    "want": {"client": "claude-ai", "source": "vendor_header", "operator": "mcp", "agent": "claude-ai"}
+  },
+  {
+    "name": "missing sentinel without mcp identity is uninstrumented",
+    "headers": {
+      "Fly-Client-Agent": "codex",
+      "Fly-Client-Parent": "node"
+    },
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  }
+]

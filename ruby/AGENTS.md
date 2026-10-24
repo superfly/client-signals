@@ -17,7 +17,8 @@ Key files:
 - `lib/client_signals.rb`: client-side detection, the `Signals` value, headers
   and User-Agent suffix, and the mirrored `KNOWN_MARKERS` table.
 - `lib/client_signals/request.rb`: server-side classification and route
-  selection, implementing `../spec/request-metrics.md`.
+  selection, implementing `../spec/request-metrics.md`, and the mirrored
+  `MCP_CLIENT_LABELS` vocabulary.
 - `test/`: minitest suite, driven by the shared fixtures in `../spec/`.
 - `client_signals.gemspec`: package metadata.
 
@@ -29,9 +30,12 @@ Key files:
 - `ClientSignals.detect_once` must cache the first detected value.
 - Keep `KNOWN_MARKERS` aligned with `../spec/markers.json`. The spec-contract
   test compares the mirror field by field, so a drifted copy fails loudly.
+- Keep `ClientSignals::Request::MCP_CLIENT_LABELS` aligned with the `client`
+  labels in `../spec/mcp-clients.json`. Ruby does not implement MCP
+  classification, but the labels are part of the known agent vocabulary.
 - Only bounded values leave `ClientSignals::Request`. A caller-supplied agent
-  name becomes `other` unless the marker table already knows it, and a raw
-  request path is never returned as a route label.
+  name becomes `other` unless the marker table or the MCP client labels
+  already know it, and a raw request path is never returned as a route label.
 
 ## Commands
 

@@ -83,6 +83,37 @@ defmodule ClientSignals.PlugTest do
     end
   end
 
+  describe "mcp_client_attributes/1" do
+    test "returns only bounded client attributes" do
+      conn =
+        Plug.Test.conn(:post, "/mcp", %{
+          "method" => "initialize",
+          "params" => %{"clientInfo" => %{"name" => "my-private-tool 1.0"}}
+        })
+        |> Plug.Conn.put_req_header("user-agent", "python-httpx/0.28.1")
+
+      assert ClientSignalsPlug.mcp_client_attributes(conn) == [
+               {"fly.client.mcp_client", "other"},
+               {"fly.client.mcp_source", "client_info"}
+             ]
+    end
+
+    test "prefers the vendor header" do
+      conn =
+        build_conn([{"user-agent", "Claude-User"}, {"x-anthropic-client", "ClaudeCode"}])
+
+      assert ClientSignalsPlug.mcp_client_attributes(conn) == [
+               {"fly.client.mcp_client", "claude-code"},
+               {"fly.client.mcp_source", "vendor_header"}
+             ]
+    end
+
+    test "returns nothing when no client is identified" do
+      assert ClientSignalsPlug.mcp_client_attributes(build_conn([{"user-agent", "curl/8.0"}])) ==
+               []
+    end
+  end
+
   describe "call/2" do
     test "returns the conn unchanged" do
       conn = build_conn([{"fly-client-interactive", "true"}])
@@ -196,6 +227,112 @@ defmodule ClientSignals.PlugTest do
                         operator: "uninstrumented",
                         agent: "none"
                       }}
+    end
+
+    test "classifies MCP routes with inferred client identity" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "flyio-mcp",
+          tracked_route_prefixes: ["/mcp", "/api/v1"],
+          mcp_route_prefixes: ["/mcp"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/mcp"]}
+        )
+
+      Plug.Test.conn(:post, "/mcp", %{
+        "method" => "initialize",
+        "params" => %{"clientInfo" => %{"name" => "Zed"}}
+      })
+      |> Plug.Conn.put_req_header("user-agent", "node")
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      assert_receive {:observed_request,
+                      %{
+                        service: "flyio-mcp",
+                        route: "POST /mcp",
+                        operator: "mcp",
+                        agent: "zed"
+                      }}
+    end
+
+    test "self-reported signals win on MCP routes" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "flyio-mcp",
+          tracked_route_prefixes: ["/mcp"],
+          mcp_route_prefixes: ["/mcp"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/mcp"]}
+        )
+
+      build_conn([
+        {"fly-client-interactive", "true"},
+        {"user-agent", "claude-code/2.1.309 (cli)"}
+      ])
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      assert_receive {:observed_request, %{operator: "interactive", agent: "none"}}
+    end
+
+    test "does not infer MCP clients outside MCP routes" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "flyio-mcp",
+          tracked_route_prefixes: ["/mcp", "/api/v1"],
+          mcp_route_prefixes: ["/mcp"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, ["/api/v1/apps"]}
+        )
+
+      build_conn([{"user-agent", "Claude-User"}])
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      assert_receive {:observed_request,
+                      %{route: "GET /api/v1/apps", operator: "uninstrumented", agent: "none"}}
+    end
+
+    test "uses the request path for unmatched MCP routes and tolerates unfetched bodies" do
+      opts =
+        ClientSignalsPlug.init(
+          service: "flyio-mcp",
+          tracked_route_prefixes: ["/mcp"],
+          mcp_route_prefixes: ["/mcp"],
+          request_observer: {__MODULE__, :observe_request, [self()]},
+          route_template_provider: {__MODULE__, :route_template, [nil]}
+        )
+
+      conn = build_conn([{"user-agent", "Cursor/3.20.21 (darwin arm64)"}])
+
+      %{conn | request_path: "/mcp", body_params: %Plug.Conn.Unfetched{aspect: :body_params}}
+      |> ClientSignalsPlug.call(opts)
+      |> Plug.Conn.send_resp(200, "ok")
+
+      assert_receive {:observed_request,
+                      %{route: "GET unmatched", operator: "mcp", agent: "cursor"}}
+    end
+
+    test "allows MCP span attributes without request observation" do
+      opts = ClientSignalsPlug.init(mcp_route_prefixes: ["/mcp"])
+
+      conn =
+        build_conn([{"user-agent", "Claude-User"}])
+        |> ClientSignalsPlug.call(opts)
+
+      assert [_before_send] = conn.private[:before_send]
+      assert Plug.Conn.send_resp(conn, 200, "ok").state == :sent
+    end
+
+    test "rejects invalid MCP route prefixes" do
+      assert_raise ArgumentError, fn ->
+        ClientSignalsPlug.init(mcp_route_prefixes: "/mcp")
+      end
+
+      assert_raise ArgumentError, fn ->
+        ClientSignalsPlug.init(mcp_route_prefixes: [:mcp])
+      end
     end
 
     test "requires the complete request observation configuration" do

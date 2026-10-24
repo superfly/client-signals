@@ -43,6 +43,11 @@ defmodule SimpleJSON do
   defp parse_string(<<"\"", rest::binary>>, acc), do: {acc, rest}
   defp parse_string(<<"\\\"", rest::binary>>, acc), do: parse_string(rest, acc <> "\"")
   defp parse_string(<<"\\\\", rest::binary>>, acc), do: parse_string(rest, acc <> "\\")
+  defp parse_string(<<"\\n", rest::binary>>, acc), do: parse_string(rest, acc <> "\n")
+  defp parse_string(<<"\\t", rest::binary>>, acc), do: parse_string(rest, acc <> "\t")
+
+  defp parse_string(<<"\\u", hex::binary-size(4), rest::binary>>, acc),
+    do: parse_string(rest, acc <> <<String.to_integer(hex, 16)::utf8>>)
 
   defp parse_string(<<char::utf8, rest::binary>>, acc),
     do: parse_string(rest, acc <> <<char::utf8>>)

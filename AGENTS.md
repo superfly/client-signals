@@ -16,11 +16,14 @@ detection logic — not just the "what" — read:
   reliability caveats.
 - `docs/markers.md` — where the known agent-marker table came from, the
   confidence behind each entry, and the checklist for adding new ones.
+- `docs/mcp-clients.md` — evidence and confidence behind each MCP client
+  rule, deliberate exclusions, and the checklist for adding new rules.
 
 ## Layout
 
-- `spec/` — shared markers and behavior fixtures for all languages.
-- `docs/` — shared rationale and marker-review guidance.
+- `spec/` — shared markers, MCP client rules, and behavior fixtures for all
+  languages.
+- `docs/` — shared rationale plus marker and MCP client rule review guidance.
 - `go/` — Go package and language-specific agent instructions.
 - `javascript/` — JavaScript package and language-specific agent instructions.
 - `python/` — Python package and language-specific agent instructions.
@@ -47,6 +50,12 @@ When working inside a language package, also read that package's
 - **Keep language implementations aligned with `spec/`.** Marker changes
   start in `spec/markers.json`, then get mirrored into each language's
   dependency-free runtime table and fixture-driven tests.
+- **MCP rule changes start in `spec/mcp-clients.json`**, then get mirrored
+  into the Go and Elixir rule tables, with fixtures in
+  `spec/mcp-client-fixtures.json`. A new client label also extends the known
+  agent vocabulary, which Ruby mirrors as `MCP_CLIENT_LABELS`. MCP classification only ever emits a
+  bounded label, `other`, or nothing, never a raw User-Agent or clientInfo
+  name. It is only applied on routes a service declares as MCP routes.
 
 ## Working in this repo
 

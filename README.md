@@ -16,13 +16,14 @@ blocking, rate-limiting, or auth decisions.
 
 ## Monorepo layout
 
-- `spec/` — shared marker table and behavior fixtures.
+- `spec/` — shared marker table, MCP client rule table, and behavior fixtures.
 - `go/` — Go implementation and package README.
 - `javascript/` — JavaScript implementation and package README.
 - `python/` — Python implementation and package README.
 - `ruby/`: Ruby implementation and package README.
 - `elixir/` — Elixir implementation and package README.
-- `docs/` — shared signal rationale and marker-review guidance.
+- `docs/` — shared signal rationale, plus marker and MCP client rule review
+  guidance.
 
 The language packages intentionally expose the same library-only surface:
 detect signals once, build/apply `{prefix}-Client-*` headers, and build the
@@ -37,6 +38,14 @@ responsible for metric registration, service names, route templates, and
 tracked route prefixes. See
 [spec/request-metrics.md](spec/request-metrics.md) for the shared
 classification, labeling, and cardinality contract.
+
+On routes a service declares as MCP routes, the Go and Elixir packages can
+also infer the MCP client from `clientInfo.name`, `User-Agent`, and
+`X-Anthropic-Client`. MCP clients never send `Fly-Client-*` headers, so these
+requests are otherwise `uninstrumented`. Recognized clients are reported with
+the bounded `mcp` operator and a client label from
+[spec/mcp-clients.json](spec/mcp-clients.json). See
+[docs/mcp-clients.md](docs/mcp-clients.md) for the evidence behind each rule.
 
 ## Shared contract
 
@@ -72,8 +81,10 @@ Go platform build checks:
 (cd go && GOOS=windows GOARCH=amd64 go build ./...)
 ```
 
-See [docs/signals.md](docs/signals.md) for signal rationale and
-[docs/markers.md](docs/markers.md) for marker-review guidance.
+See [docs/signals.md](docs/signals.md) for signal rationale,
+[docs/markers.md](docs/markers.md) for marker-review guidance, and
+[docs/mcp-clients.md](docs/mcp-clients.md) for MCP client rule review
+guidance.
 
 ## Releases
 

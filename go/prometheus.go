@@ -42,6 +42,26 @@ func NewRequestCounter(service string, trackedRoutePrefixes []string) *RequestCo
 // belongs to a configured prefix. routeTemplate should be the bounded template
 // reported by the service's router, not the raw request path.
 func (c *RequestCounter) Observe(req *http.Request, routeTemplate string) bool {
+	return c.observe(req, routeTemplate, func() RequestClassification {
+		return ClassifyRequestHeaders(req.Header)
+	})
+}
+
+// ObserveMCP is Observe for routes the service declares as MCP routes: it
+// classifies with ClassifyMCPRequest, so uninstrumented requests from a
+// recognized MCP client are recorded with operator "mcp". clientName is the
+// request's clientInfo.name ("" when absent) and is never used as a label.
+func (c *RequestCounter) ObserveMCP(req *http.Request, routeTemplate, clientName string) bool {
+	return c.observe(req, routeTemplate, func() RequestClassification {
+		return ClassifyMCPRequest(req.Header, clientName)
+	})
+}
+
+func (c *RequestCounter) observe(
+	req *http.Request,
+	routeTemplate string,
+	classify func() RequestClassification,
+) bool {
 	route, tracked := TrackedRoute(
 		req.Method,
 		routeTemplate,
@@ -52,7 +72,7 @@ func (c *RequestCounter) Observe(req *http.Request, routeTemplate string) bool {
 		return false
 	}
 
-	classification := ClassifyRequestHeaders(req.Header)
+	classification := classify()
 	c.counter.WithLabelValues(
 		c.service,
 		route,

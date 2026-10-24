@@ -42,7 +42,10 @@ signals.apply_headers(request_headers)
 
 `ClientSignals::Request` implements `spec/request-metrics.md`. Both values it
 returns are safe to use as metric labels: a caller-supplied agent name never
-reaches a label unless the marker table already knows it.
+reaches a label unless the known agent vocabulary already has it. That
+vocabulary is the marker table plus the MCP client labels in
+`spec/mcp-clients.json`, so `Fly-Client-Agent: zed` reports `zed`. MCP client
+classification itself is only implemented in the Go and Elixir packages.
 
 ```ruby
 require "client_signals/request"
