@@ -14,6 +14,15 @@ type markerFixture struct {
 	Values []string `json:"values"`
 }
 
+type mcpClientRuleFixture struct {
+	Client   string `json:"client"`
+	Field    string `json:"field"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+	Contains string `json:"contains"`
+	Weak     bool   `json:"weak"`
+}
+
 type sanitizeFixture struct {
 	Name  string `json:"name"`
 	Input string `json:"input"`
@@ -62,6 +71,31 @@ func TestKnownMarkers_MatchSharedSpec(t *testing.T) {
 			if got.values[j] != fixture.Values[j] {
 				t.Fatalf("marker %d values = %+v, want %+v", i, got.values, fixture.Values)
 			}
+		}
+	}
+}
+
+func TestMCPClientRules_MatchSharedSpec(t *testing.T) {
+	var spec struct {
+		Rules []mcpClientRuleFixture `json:"rules"`
+	}
+	readSpecFixture(t, "mcp-clients.json", &spec)
+
+	if len(spec.Rules) != len(mcpClientRules) {
+		t.Fatalf("mcp client rule count = %d, want %d", len(mcpClientRules), len(spec.Rules))
+	}
+
+	for i, fixture := range spec.Rules {
+		got := mcpClientRule{
+			client:   fixture.Client,
+			field:    mcpFieldFromName(t, fixture.Field),
+			kind:     mcpMatchKindFromName(t, fixture.Kind),
+			value:    fixture.Value,
+			contains: fixture.Contains,
+			weak:     fixture.Weak,
+		}
+		if mcpClientRules[i] != got {
+			t.Fatalf("mcp client rule %d = %+v, want %+v", i, mcpClientRules[i], fixture)
 		}
 	}
 }
@@ -140,6 +174,40 @@ func matchKindName(kind matchKind) string {
 		return "exactValue"
 	default:
 		return ""
+	}
+}
+
+func mcpFieldFromName(t *testing.T, name string) mcpField {
+	t.Helper()
+
+	switch name {
+	case "vendorClient":
+		return mcpVendorClient
+	case "userAgent":
+		return mcpUserAgent
+	case "clientName":
+		return mcpClientName
+	default:
+		t.Fatalf("unknown mcp client rule field %q", name)
+
+		return 0
+	}
+}
+
+func mcpMatchKindFromName(t *testing.T, name string) mcpMatchKind {
+	t.Helper()
+
+	switch name {
+	case "exact":
+		return mcpExact
+	case "prefix":
+		return mcpPrefix
+	case "token":
+		return mcpToken
+	default:
+		t.Fatalf("unknown mcp client rule kind %q", name)
+
+		return 0
 	}
 }
 

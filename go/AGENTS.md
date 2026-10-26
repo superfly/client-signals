@@ -15,6 +15,10 @@ Key files:
   parent-process lookup and finite bucket classification.
 - `agent.go` and `markers.go` — cooperative agent-marker detection.
 - `ci.go` — CI detection.
+- `request.go` and `prometheus.go` — server-side request classification and
+  the canonical request counter.
+- `mcp.go` and `mcp_clients.go` — opt-in MCP client inference for declared MCP
+  routes (`ClassifyMCPClient`, `ClassifyMCPRequest`, `ObserveMCP`).
 - `transport.go` — `ClientSignalsTransport`, `Signals.WrapTransport`, and
   header helpers.
 - `cmd/` — small JSON inspection CLI.
@@ -28,6 +32,11 @@ Key files:
 - `DetectOnce` must remain cached with `sync.OnceValue`.
 - `ClientSignalsTransport` must not perform detection per request.
 - Keep `knownMarkers` aligned with `../spec/markers.json`.
+- Keep `mcpClientRules` aligned with `../spec/mcp-clients.json`, in the same
+  order. MCP rule changes start in the spec, not here.
+- MCP normalization is byte-oriented: lowercase ASCII only (never
+  `strings.ToLower`), and never return or label raw User-Agent or
+  `clientInfo` values.
 
 ## Commands
 

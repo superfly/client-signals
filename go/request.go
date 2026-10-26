@@ -103,14 +103,27 @@ func normalizeRequestAgent(raw string) string {
 		return RequestAgentNone
 	}
 
-	for _, marker := range knownMarkers {
-		if marker.agent == agent {
-			return agent
-		}
+	if _, ok := knownRequestAgents[agent]; ok {
+		return agent
 	}
 
 	return RequestAgentOther
 }
+
+// knownRequestAgents is the bounded agent vocabulary: marker-table agents plus
+// MCP client labels, so a self-declared MCP client name (for example a child
+// of an MCP server setting FLY_INVOKED_BY=zed) keeps its label.
+var knownRequestAgents = func() map[string]struct{} {
+	agents := make(map[string]struct{}, len(knownMarkers)+len(mcpClientRules))
+	for _, marker := range knownMarkers {
+		agents[marker.agent] = struct{}{}
+	}
+	for _, rule := range mcpClientRules {
+		agents[rule.client] = struct{}{}
+	}
+
+	return agents
+}()
 
 func parseRequestBool(raw string) (bool, bool) {
 	if raw == "" {

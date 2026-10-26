@@ -16,6 +16,18 @@ class ClientSignalsRequestTest < Minitest::Test
     end
   end
 
+  def test_mcp_client_labels_match_the_shared_spec
+    want = fixture("mcp-clients.json")["rules"].map { |rule| rule["client"] }.uniq
+
+    assert_equal want, Request::MCP_CLIENT_LABELS,
+      "the mirrored MCP client labels have drifted from spec/mcp-clients.json"
+  end
+
+  def test_an_mcp_client_label_is_a_known_agent
+    assert_equal "zed", Request.normalize_agent("Zed")
+    assert_equal "claude-code", Request.normalize_agent("claude-code")
+  end
+
   def test_route_selection_matches_the_shared_fixtures
     fixture("route-fixtures.json").each do |f|
       route, tracked = Request.tracked_route(

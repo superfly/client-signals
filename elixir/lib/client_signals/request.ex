@@ -15,6 +15,10 @@ defmodule ClientSignals.Request do
   @agent_none "none"
   @agent_other "other"
 
+  # Env-marker agents plus MCP client labels, so a self-reported MCP client
+  # label (e.g. `Fly-Client-Agent: zed`) is kept rather than reported as other.
+  @known_agents Enum.uniq(ClientSignals.known_agents() ++ ClientSignals.MCP.labels())
+
   @doc """
   Classifies incoming header values into bounded `operator` and `agent` labels.
 
@@ -74,7 +78,7 @@ defmodule ClientSignals.Request do
   defp normalize_agent(agent) when is_binary(agent) do
     case ClientSignals.sanitize_invoked_by(agent) do
       {agent, true} ->
-        if agent in ClientSignals.known_agents(), do: agent, else: @agent_other
+        if agent in @known_agents, do: agent, else: @agent_other
 
       {"", false} ->
         @agent_none

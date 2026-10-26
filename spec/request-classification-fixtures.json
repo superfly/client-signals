@@ -96,5 +96,30 @@
       "Fly-Client-Agent-Source": "env:CODEX_THREAD_ID"
     },
     "want": {"operator": "automated_unattributed", "agent": "none"}
+  },
+  {
+    "name": "mcp client label is a known agent",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "zed"
+    },
+    "want": {"operator": "agent", "agent": "zed"}
+  },
+  {
+    "name": "mcp-only client label is a known agent",
+    "headers": {
+      "Fly-Client-Interactive": "true",
+      "Fly-Client-Agent": "Claude-AI"
+    },
+    "want": {"operator": "agent", "agent": "claude-ai"}
+  },
+  {
+    "name": "ci preserves mcp client label",
+    "headers": {
+      "Fly-Client-Interactive": "false",
+      "Fly-Client-Agent": "vscode",
+      "Fly-Client-CI": "true"
+    },
+    "want": {"operator": "ci", "agent": "vscode"}
   }
 ]

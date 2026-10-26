@@ -89,9 +89,56 @@ method with the matched route template. Unmatched requests under a configured
 prefix use `"METHOD unmatched"`; raw request paths are never forwarded.
 
 The `operator` values are `ci`, `agent`, `interactive`,
-`automated_unattributed`, and `uninstrumented`. The `agent` value is a known
-finite agent name, `other`, or `none`. Parent is deliberately not used for
-classification.
+`automated_unattributed`, `uninstrumented`, and (on MCP routes only) `mcp`.
+The `agent` value is a known finite agent name or MCP client label, `other`,
+or `none`. Parent is deliberately not used for classification.
+
+### MCP routes
+
+MCP clients do not send `Fly-Client-*` headers, but they do identify
+themselves through `clientInfo.name`, `User-Agent`, and `X-Anthropic-Client`.
+List the routes that serve MCP in `:mcp_route_prefixes` to infer a bounded
+client label for them:
+
+```elixir
+plug ClientSignals.Plug,
+  service: "my-mcp",
+  tracked_route_prefixes: ["/mcp"],
+  mcp_route_prefixes: ["/mcp"],
+  route_template_provider: {MyApp.ClientSignals, :route_template, []}
+```
+
+On those routes a valid `Fly-Client-Interactive` header still wins for the
+metric labels. Otherwise an identified client is reported as
+`operator: "mcp"` with the client label (or `other`) as the agent. Independent
+of the metric, whenever a client is identified on an MCP route the Plug sets
+the `fly.client.mcp_client` and `fly.client.mcp_source` span attributes, even
+when the request also self-reports and even when the route is not in
+`:tracked_route_prefixes`. `clientInfo.name` is read from `conn.body_params`
+when the response is sent, so it only needs a JSON `Plug.Parsers` somewhere in
+the pipeline; an unfetched body is ignored. Do not list ordinary REST routes:
+`Claude-User` is also the User-Agent of Claude Code's web fetches.
+
+On protocol versions up to 2025-11-25 `clientInfo` is sent only on
+`initialize`, so clients without a distinctive User-Agent (OpenCode, Gemini
+CLI, Cline, and others) are labelled on that call only. Compare such clients
+by `initialize` volume. See the stateless caveat in
+[`spec/request-metrics.md`](../spec/request-metrics.md).
+
+Without a Plug, use `ClientSignals.MCP` directly:
+
+- `ClientSignals.MCP.classify_client/3` takes the User-Agent,
+  `X-Anthropic-Client`, and `clientInfo.name` values and returns
+  `%{client: label, source: source}`.
+- `ClientSignals.MCP.classify_request/6` adds the three `Fly-Client-*` header
+  values and returns `%{operator: operator, agent: agent}`.
+- `ClientSignals.MCP.client_name/1` extracts `clientInfo.name` from a decoded
+  JSON-RPC request or its params.
+
+These values are inferred from caller-controlled input. Use them for
+estimates only, never for gating. The rules live in
+[`spec/mcp-clients.json`](../spec/mcp-clients.json); see
+[`docs/mcp-clients.md`](../docs/mcp-clients.md) for their provenance.
 
 The package owns the canonical telemetry event and PromEx metric definition.
 The route-template provider, service name, tracked route prefixes, PromEx
@@ -105,4 +152,5 @@ application's router.
 ```sh
 mix test
 mix format --check-formatted
+mix compile --warnings-as-errors
 ```

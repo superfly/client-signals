@@ -8,7 +8,8 @@ module ClientSignals
   #
   # The operator and agent values returned here are safe to use as metric
   # labels: every one of them comes from a fixed set, and a caller-supplied
-  # agent name never reaches a label unless the marker table already knows it.
+  # agent name never reaches a label unless the known agent vocabulary (the
+  # marker table plus the MCP client labels) already has it.
   #
   # This is aggregate observability only. Client signals are self-reported and
   # must not be used for authentication, authorization, rate limiting,
@@ -32,6 +33,19 @@ module ClientSignals
 
     TRUE_VALUES = %w[1 t true].freeze
     FALSE_VALUES = %w[0 f false].freeze
+
+    # The client labels in ../spec/mcp-clients.json, in first-appearance order.
+    # Server-side classification treats these together with the marker agents
+    # as the known agent vocabulary, so a declared Fly-Client-Agent naming an
+    # MCP client keeps its label. Ruby does not implement MCP classification
+    # itself; only the vocabulary is mirrored, and the spec-contract test keeps
+    # it honest.
+    MCP_CLIENT_LABELS = %w[
+      claude-code claude-ai codex chatgpt openai-api openai vscode cursor copilot
+      zed goose grok anthropic-api jetbrains-ai junie gemini-cli opencode cline
+      roo-code kilo-code continue kiro augment amp warp librechat pi openclaw
+      hermes
+    ].freeze
 
     UNKNOWN_METHOD = "UNKNOWN"
     UNMATCHED_ROUTE = "unmatched"
@@ -94,14 +108,19 @@ module ClientSignals
       ["", false]
     end
 
-    # The bounded agent label: the normalized name when the marker table knows
-    # it, "other" for a well-formed name it does not, "none" for anything that
-    # is not a bare tool-name identifier.
+    # The bounded agent label: the normalized name when the known agent
+    # vocabulary has it, "other" for a well-formed name it does not, "none" for
+    # anything that is not a bare tool-name identifier.
     def normalize_agent(agent)
       name, ok = ClientSignals.sanitize_invoked_by(agent)
       return AGENT_NONE unless ok
 
-      ClientSignals.known_agents.include?(name) ? name : AGENT_OTHER
+      known_agents.include?(name) ? name : AGENT_OTHER
+    end
+
+    # The marker table's agents together with MCP_CLIENT_LABELS.
+    def known_agents
+      @known_agents ||= (ClientSignals.known_agents | MCP_CLIENT_LABELS).freeze
     end
 
     # true, false, or nil for a value that is not a supported boolean. The nil
