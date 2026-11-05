@@ -20,6 +20,8 @@
     {"client": "zed", "field": "userAgent", "kind": "token", "value": "zed"},
     {"client": "goose", "field": "userAgent", "kind": "token", "value": "goose"},
     {"client": "grok", "field": "userAgent", "kind": "token", "value": "grok-cli"},
+    {"client": "exa-searchbot", "field": "userAgent", "kind": "prefix", "value": "mozilla/5.0 (compatible; exasearchbot/"},
+    {"client": "exa-user", "field": "userAgent", "kind": "prefix", "value": "mozilla/5.0 (compatible; exauser/"},
 
     {"client": "claude-code", "field": "clientName", "kind": "exact", "value": "claude-code"},
     {"client": "claude-ai", "field": "clientName", "kind": "exact", "value": "claude-ai"},

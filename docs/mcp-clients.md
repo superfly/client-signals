@@ -40,7 +40,8 @@ Labels reuse the `markers.json` agent names when the product is the same
 `opencode`, `kilo-code`, `kiro`, `augment`, `pi`, `openclaw`, `hermes`). New
 labels are added only for clients that have no marker: `claude-ai`,
 `anthropic-api`, `chatgpt`, `openai-api`, `openai`, `vscode`, `zed`, `cline`,
-`roo-code`, `continue`, `amp`, `junie`, `jetbrains-ai`, `warp`, `librechat`.
+`roo-code`, `continue`, `amp`, `junie`, `jetbrains-ai`, `warp`, `librechat`,
+`exa-searchbot`, `exa-user`.
 
 Server-side request classification treats the union of both sets as the known
 agent vocabulary, so `Fly-Client-Agent: zed` reports `zed`, not `other`.
@@ -108,6 +109,8 @@ classification falls through to the User-Agent.
 | `zed` | `zed` | High | First-party: Zed sets `Zed/<app version> (<os>; <arch>)`, e.g. `Zed/1.27.0 (macos; aarch64)`, as the default UA of its HTTP client. User-configured static headers can replace it. |
 | `goose` | `goose` | High | First-party: goose's streamable HTTP transport sets `goose/<CARGO_PKG_VERSION>`. Under ACP, goose takes the ACP host's clientInfo name, so the UA is the better signal there. |
 | `grok` | `grok-cli` | High | First-party: Grok Build sets `grok-cli/<version>` (bare `grok-cli` for Figma hosts) only when the request has no UA yet. |
+| `exa-searchbot` | `mozilla/5.0 (compatible; exasearchbot/` (prefix) | Med | Captured: `Mozilla/5.0 (compatible; ExaSearchBot/1.0; +https://crawler.exa.ai/)` in sprites.dev page traffic. Exa's crawler, not an MCP client, so a hit on an MCP route means it fetched the route. It's a prefix because the name follows a browser-style `Mozilla/5.0` opening, which `token` can't match. An exception to the scanner exclusion below, for traffic reporting. |
+| `exa-user` | `mozilla/5.0 (compatible; exauser/` (prefix) | Med | Captured: `Mozilla/5.0 (compatible; ExaUser/1.0; +https://crawler.exa.ai/exauser)` and the `+https://exauser.crawler.exa.ai` variant in sprites.dev page traffic. Exa's live fetcher. Same caveats as `exa-searchbot`. |
 
 ### `clientInfo.name` (exact, unless noted)
 
@@ -194,7 +197,8 @@ send a clientInfo name, and as `uninstrumented/none` otherwise:
   also carries arbitrary user-set values. Everything maps to `claude-code`.
 - **Scanner and browser User-Agents**: MCP registry bots, generic crawlers and
   browsers hitting `/mcp` send no clientInfo and match no UA rule, so they
-  stay out of the `mcp` operator.
+  stay out of the `mcp` operator. Exa is the named exception: Cursor CLI and
+  Devin search through it, so its two user agents have rules.
 
 ## Never read
 

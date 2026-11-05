@@ -42,9 +42,9 @@ module ClientSignals
     # it honest.
     MCP_CLIENT_LABELS = %w[
       claude-code claude-ai codex chatgpt openai-api openai vscode cursor copilot
-      zed goose grok anthropic-api jetbrains-ai junie gemini-cli opencode cline
-      roo-code kilo-code continue kiro augment amp warp librechat pi openclaw
-      hermes
+      zed goose grok exa-searchbot exa-user anthropic-api jetbrains-ai junie
+      gemini-cli opencode cline roo-code kilo-code continue kiro augment amp warp
+      librechat pi openclaw hermes
     ].freeze
 
     UNKNOWN_METHOD = "UNKNOWN"

@@ -1163,5 +1163,25 @@
       "Fly-Client-Parent": "node"
     },
     "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
+  },
+  {
+    "name": "exa searchbot user agent",
+    "headers": {"User-Agent": "Mozilla/5.0 (compatible; ExaSearchBot/1.0; +https://crawler.exa.ai/)"},
+    "want": {"client": "exa-searchbot", "source": "user_agent", "operator": "mcp", "agent": "exa-searchbot"}
+  },
+  {
+    "name": "exa user agent",
+    "headers": {"User-Agent": "Mozilla/5.0 (compatible; ExaUser/1.0; +https://crawler.exa.ai/exauser)"},
+    "want": {"client": "exa-user", "source": "user_agent", "operator": "mcp", "agent": "exa-user"}
+  },
+  {
+    "name": "exa user agent, alternate crawler url",
+    "headers": {"User-Agent": "Mozilla/5.0 (compatible; ExaUser/1.0; +https://exauser.crawler.exa.ai)"},
+    "want": {"client": "exa-user", "source": "user_agent", "operator": "mcp", "agent": "exa-user"}
+  },
+  {
+    "name": "lookalike of the exa user agent does not match",
+    "headers": {"User-Agent": "Mozilla/5.0 (compatible; ExaUserish/1.0)"},
+    "want": {"client": "", "source": "none", "operator": "uninstrumented", "agent": "none"}
   }
 ]
