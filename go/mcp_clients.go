@@ -58,6 +58,8 @@ var mcpClientRules = []mcpClientRule{
 	{client: "zed", field: mcpUserAgent, kind: mcpToken, value: "zed"},
 	{client: "goose", field: mcpUserAgent, kind: mcpToken, value: "goose"},
 	{client: "grok", field: mcpUserAgent, kind: mcpToken, value: "grok-cli"},
+	{client: "exa-searchbot", field: mcpUserAgent, kind: mcpPrefix, value: "mozilla/5.0 (compatible; exasearchbot/"},
+	{client: "exa-user", field: mcpUserAgent, kind: mcpPrefix, value: "mozilla/5.0 (compatible; exauser/"},
 
 	{client: "claude-code", field: mcpClientName, kind: mcpExact, value: "claude-code"},
 	{client: "claude-ai", field: mcpClientName, kind: mcpExact, value: "claude-ai"},
